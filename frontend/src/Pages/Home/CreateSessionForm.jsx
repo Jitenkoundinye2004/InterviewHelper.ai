@@ -27,62 +27,6 @@ const CreateSessionForm = ({ onSuccess }) => {
         }));
     };
 
-    // const handleCreateSession = async (e) => {
-    //     e.preventDefault();
-
-    //     const { role, experience, topicsToFocus } = formData;
-
-    //     if (!role || !experience || !topicsToFocus) {
-    //         setError("Please fill all the required fields")
-    //         return
-    //     }
-    //     setError("");
-    //     setIsLoading(true);
-
-    //     try {
-    //         // First, generate interview questions using AI
-    //         console.log("Generating questions...");
-    //         const aiResponse = await axiosInstance.post(API_PATHS.AI.GENERATE_QUESTIONS, {
-    //             role,
-    //             experience: parseInt(experience),
-    //             topicsToFocus,
-    //             numberOfQuestions: 5, // Generate 5 questions by default
-    //         });
-
-    //         console.log("AI Response:", aiResponse.data);
-
-    //         if (aiResponse.data && Array.isArray(aiResponse.data)) {
-    //             // Then create session with the generated questions
-    //             const response = await axiosInstance.post(API_PATHS.SESSION.CREATE, {
-    //                 role,
-    //                 experience: parseInt(experience),
-    //                 topicsToFocus,
-    //                 description: formData.description,
-    //                 questions: aiResponse.data,
-    //             });
-
-    //             if (response.data.success) {
-    //                 // Success - call onSuccess callback to close modal and refresh dashboard
-    //                 if (onSuccess) {
-    //                     onSuccess();
-    //                 }
-    //                 // Navigate to the session
-    //                 navigate(`/InterviewPrep/${response.data.session._id}`);
-    //             } else {
-    //                 setError(response.data.message || 'Failed to create session');
-    //             }
-    //         } else {
-    //             setError('Failed to generate interview questions. Please try again.');
-    //         }
-    //     } catch (error) {
-    //         console.error("Error creating session: ", error?.response?.data || error?.message || error);
-    //         toast.error(error?.response?.data?.message || "Server error. Please try again.");
-    //     }
-    //     finally {
-    //         setIsLoading(false);
-    //     }
-    // };
-
 const handleCreateSession = async (e) => {
   e.preventDefault();
 
