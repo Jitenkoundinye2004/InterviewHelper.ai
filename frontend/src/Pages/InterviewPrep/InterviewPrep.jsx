@@ -222,7 +222,7 @@ const InterviewPrepPage = () => {
                 )}
 
                 <div className="grid grid-cols-12 gap-8">
-                    <div className={`col-span-12 transition-all duration-300 ease-in-out ${openLeanWordDrawer ? "lg:col-span-8" : "lg:col-span-12"}`}>
+                    <div className={`col-span-12 transition-all duration-300 ease-in-out ${openLeanWordDrawer ? "lg:col-span-8" : "lg:col-span-12"}`} style={{ overflowY: openLeanWordDrawer ? "hidden" : "auto", maxHeight: "calc(100vh - 200px)" }}>
                         <AnimatePresence>
                             {sessionData?.questions?.length === 0 && !isLoading && (
                                 <div className="text-center py-12">
