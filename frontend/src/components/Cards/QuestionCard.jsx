@@ -8,20 +8,25 @@ const QuestionCard = ({
     answer,
     onLearnMore,
     isPinned,
-    onTogglePin
+    onTogglePin,
+    isDrawerOpen // ✅ comes from parent
 }) => {
     const [isExpanded, setIsExpanded] = useState(false);
     const [height, setHeight] = useState(0);
     const contentRef = useRef(null);
 
     useEffect(() => {
-        if (isExpanded) {
+        if (isExpanded && !isDrawerOpen) {
+            // normal expanded size
             const contentHeight = contentRef.current.scrollHeight;
             setHeight(contentHeight + 10);
+        } else if (isDrawerOpen) {
+            // shrink when drawer is open
+            setHeight(80); // preview height
         } else {
-            setHeight(0);
+            setHeight(0); // collapsed
         }
-    }, [isExpanded]);
+    }, [isExpanded, isDrawerOpen]);
 
     const toggleExpand = () => {
         setIsExpanded(!isExpanded);
@@ -29,8 +34,8 @@ const QuestionCard = ({
 
     return (
         <div className="bg-white rounded-lg mb-4 overflow-hidden py-4 px-5 shadow-xl shadow-gray-100/70 border border-gray/100/60 group">
+            {/* Top Row */}
             <div className="flex items-start gap-3.5">
-                {/* Left side Q + Question */}
                 <div className="flex items-start gap-3.5 flex-grow">
                     <span className="text-sm font-semibold text-gray-400 leading-[18px]">
                         Q
@@ -43,14 +48,13 @@ const QuestionCard = ({
                     </h3>
                 </div>
 
-                {/* Right side buttons */}
                 <div className="flex items-center justify-end relative ml-auto">
                     <div
                         className={`flex gap-2 transition-opacity duration-300 ${
-                            isExpanded ? "md:flex" : "md:hidden group-hover:flex"
+                            isExpanded ? 'md:flex' : 'md:hidden group-hover:flex'
                         }`}
                     >
-                        {/* Pin/Unpin */}
+                        {/* Pin / Unpin */}
                         <button
                             className="flex items-center gap-2 text-xs text-indigo-800 font-medium bg-indigo-50 px-3 py-1 mr-2 rounded text-nowrap border border-indigo-50 hover:border-indigo-200 cursor-pointer"
                             onClick={onTogglePin}
@@ -83,7 +87,7 @@ const QuestionCard = ({
                         <LuChevronDown
                             size={20}
                             className={`transform transition-transform duration-300 ${
-                                isExpanded ? "rotate-180" : ""
+                                isExpanded ? 'rotate-180' : ''
                             }`}
                         />
                     </button>
