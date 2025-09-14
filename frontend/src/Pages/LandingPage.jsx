@@ -1,5 +1,5 @@
 import React, { useContext, useState } from "react";
-import iprep from "../Assets/iprep.png";
+import iprep from "../assets/iprep.png";
 import { useNavigate } from "react-router-dom";
 import { LuSparkles } from "react-icons/lu";
 import { app_features } from "../utils/data";
