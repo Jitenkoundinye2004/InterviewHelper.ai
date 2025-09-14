@@ -6,7 +6,7 @@
 import axios from "axios";
 
 // const baseURL = import.meta.env.VITE_API_URL || "https://interviewhelper-ai.onrender.com";
-const baseURL = import.meta.env?.VITE_API_URL || "https://your-backend-url.onrender.com" || "http://localhost:8000";
+const baseURL = import.meta.env?.VITE_API_URL || "https://interviewhelper-ai.onrender.com";
 
 const axiosInstance = axios.create({
   baseURL,
