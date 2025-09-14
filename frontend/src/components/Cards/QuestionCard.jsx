@@ -11,7 +11,6 @@ const QuestionCard = ({
     onTogglePin
 }) => {
     const [isExpanded, setIsExpanded] = useState(false);
-
     const [height, setHeight] = useState(0);
     const contentRef = useRef(null);
 
@@ -31,26 +30,39 @@ const QuestionCard = ({
     return (
         <div className="bg-white rounded-lg mb-4 overflow-hidden py-4 px-5 shadow-xl shadow-gray-100/70 border border-gray/100/60 group">
             <div className="flex items-start gap-3.5">
-                {/* The following div seems redundant, so I've simplified the structure */}
+                {/* Left side Q + Question */}
                 <div className="flex items-start gap-3.5 flex-grow">
                     <span className="text-sm font-semibold text-gray-400 leading-[18px]">
                         Q
                     </span>
-                    {/* Changed font size here */}
-                    <h3 className="text-base md:text-lg font-medium text-gray-800 mr-0 md:mr-20 cursor-pointer flex-grow" onClick={toggleExpand}>
+                    <h3
+                        className="text-base md:text-lg font-medium text-gray-800 mr-0 md:mr-20 cursor-pointer flex-grow"
+                        onClick={toggleExpand}
+                    >
                         {question}
                     </h3>
                 </div>
-                
+
+                {/* Right side buttons */}
                 <div className="flex items-center justify-end relative ml-auto">
-                <div className={`flex gap-2 transition-opacity duration-300 ${isExpanded ? "md:flex" : "md:hidden group-hover:flex"}`}>
-                    <button
+                    <div
+                        className={`flex gap-2 transition-opacity duration-300 ${
+                            isExpanded ? "md:flex" : "md:hidden group-hover:flex"
+                        }`}
+                    >
+                        {/* Pin/Unpin */}
+                        <button
                             className="flex items-center gap-2 text-xs text-indigo-800 font-medium bg-indigo-50 px-3 py-1 mr-2 rounded text-nowrap border border-indigo-50 hover:border-indigo-200 cursor-pointer"
                             onClick={onTogglePin}
                         >
-                            {isPinned ? (<LuPinOff className="text-xs" />) : (<LuPin className="text-xs" />)}
+                            {isPinned ? (
+                                <LuPinOff className="text-xs" />
+                            ) : (
+                                <LuPin className="text-xs" />
+                            )}
                         </button>
 
+                        {/* Learn More */}
                         <button
                             className="flex items-center gap-2 text-xs text-cyan-800 font-medium bg-cyan-50 px-3 py-1 rounded text-nowrap border border-cyan-50 hover:border-cyan-200 cursor-pointer"
                             onClick={() => {
@@ -58,33 +70,36 @@ const QuestionCard = ({
                                 onLearnMore();
                             }}
                         >
-                            <LuSparkles/>
+                            <LuSparkles />
                             <span className="hidden md:block">Learn More</span>
                         </button>
                     </div>
 
+                    {/* Chevron */}
                     <button
                         className="text-gray-400 hover:text-gray-500 cursor-pointer ml-2"
                         onClick={toggleExpand}
                     >
                         <LuChevronDown
                             size={20}
-                            className={`transform transition-transform duration-300 ${isExpanded ? "rotate-180" : ""}`}
+                            className={`transform transition-transform duration-300 ${
+                                isExpanded ? "rotate-180" : ""
+                            }`}
                         />
                     </button>
                 </div>
             </div>
-            
+
+            {/* Expandable Content */}
             <div
                 className="overflow-hidden transition-all duration-300 ease-in-out"
                 style={{ maxHeight: `${height}px` }}
             >
-                <div ref={contentRef} className="mt-4 text-gray-700 bg-gray-50 px-5 py-3 rounded-lg">
-                    {/* This div seems to duplicate content. Assuming AIResponsePreview displays the answer,
-                        I've simplified this section to avoid redundancy. */}
-                    <div className="text-sm md:text-base leading-relaxed">
-                        {answer}
-                    </div>
+                <div
+                    ref={contentRef}
+                    className="mt-4 text-gray-700 bg-gray-50 px-5 py-3 rounded-lg"
+                >
+                    <AIResponsePreview content={answer} />
                 </div>
             </div>
         </div>
