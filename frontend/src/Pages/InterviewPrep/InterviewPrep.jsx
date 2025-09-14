@@ -70,12 +70,10 @@ const InterviewPrepPage = () => {
         }
     };
 
-    // Generate Concept Explanation
     const generateConceptExplanation = async (question) => {
         try {
             setErrorMsg("")
             setExplanation(null)
-
             setIsLoading(true);
             setOpenLeanWordDrawer(true);
             const response = await axiosInstance.post(API_PATHS.AI.GENERATE_EXPLANATION, { concept: question });
@@ -92,7 +90,6 @@ const InterviewPrepPage = () => {
         }
     }
 
-    // Pin Question
     const toggleQuestionPinStatus = async (questionId) => {
         try {
             const response = await axiosInstance.post(
@@ -110,9 +107,6 @@ const InterviewPrepPage = () => {
         }
     };
 
-    
-
-    // Add more questions to a session
     const uploadMoreQuestions = async () => {
         try {
             setIsUpdateLoader(true);
@@ -125,7 +119,6 @@ const InterviewPrepPage = () => {
                 numberOfQuestions: 10,
             });
 
-            // Add timeout handling for the AI generation
             const aiResponsePromise = axiosInstance.post(
                 API_PATHS.AI.GENERATE_QUESTIONS,
                 {
@@ -136,7 +129,6 @@ const InterviewPrepPage = () => {
                 }
             );
 
-            // Set a reasonable timeout for question generation
             const timeoutPromise = new Promise((_, reject) =>
                 setTimeout(() => reject(new Error('Question generation timed out')), 45000)
             );
@@ -210,38 +202,38 @@ const InterviewPrepPage = () => {
                         : ""
                 }
             />
-            <div className="container mx-auto pt-4 pb-4 px-4 md:px-0">
-                <h2 className="text-lg font-semibold color-black">Interview Q & A</h2>
-
-                {/* Delete button removed as per user request */}
+            <div className="container mx-auto py-8 px-4 sm:px-6 lg:px-8">
+                <h2 className="text-xl font-bold text-gray-800 mb-8">Interview Q & A</h2>
 
                 {errorMsg && (
-                    <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg">
-                        <p className="text-red-800 font-medium">Error: {errorMsg}</p>
+                    <div className="mb-6 p-4 bg-red-100 border border-red-300 rounded-lg shadow-sm">
+                        <p className="text-red-700 font-medium flex items-center gap-2">
+                            <AlertCircle className="w-5 h-5" /> Error: {errorMsg}
+                        </p>
                     </div>
                 )}
 
                 {isLoading && (
-                    <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                        <p className="text-blue-800 font-medium">Loading session data...</p>
+                    <div className="mb-6 p-4 bg-blue-100 border border-red-300 rounded-lg shadow-sm">
+                        <p className="text-blue-700 font-medium flex items-center gap-2">
+                            <SpinnerLoader className="w-5 h-5" /> Loading session data...
+                        </p>
                     </div>
                 )}
 
-                <div className="grid grid-cols-12 gap-4 mt-5 mb-10">
-                    <div className={`col-span-12 ${openLeanWordDrawer ? "md:col-span-7" : "md:col-span-12"
-                        }`}
-                    >
+                <div className="grid grid-cols-12 gap-8">
+                    <div className={`col-span-12 transition-all duration-300 ease-in-out ${openLeanWordDrawer ? "lg:col-span-8" : "lg:col-span-12"}`}>
                         <AnimatePresence>
                             {sessionData?.questions?.length === 0 && !isLoading && (
-                                <div className="text-center py-8">
-                                    <p className="text-gray-500">No questions found for this session.</p>
+                                <div className="text-center py-12">
+                                    <p className="text-gray-500 text-lg">No questions found for this session.</p>
                                 </div>
                             )}
                             {sessionData?.questions?.map((data, index) => {
                                 return (
                                     <motion.div
                                         key={data._id || index}
-                                        initial={{ opacity: 0, y: -20 }}
+                                        initial={{ opacity: 0, y: 20 }}
                                         animate={{ opacity: 1, y: 0 }}
                                         exit={{ opacity: 0, scale: 0.95 }}
                                         transition={{
@@ -253,6 +245,7 @@ const InterviewPrepPage = () => {
                                         }}
                                         layout
                                         layoutId={`question-${data._id || index}`}
+                                        className="mb-4 p-5 bg-white rounded-xl shadow-md transform transition-all hover:scale-[1.01] hover:shadow-lg"
                                     >
                                         <QuestionCard
                                             question={data?.question}
@@ -267,33 +260,32 @@ const InterviewPrepPage = () => {
                             })}
                         </AnimatePresence>
 
-                        {/* Load More Button - Always rendered after all questions */}
                         {!isLoading && sessionData?.questions?.length > 0 && (
-                            <div className="flex items-center justify-center mt-5">
+                            <div className="flex items-center justify-center mt-8">
                                 <button
-                                    className="flex items-center gap-3 text-sm text-white font-medium bg-black px-5 py-2 mr-2 rounded text-nowrap cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                                    className="flex items-center gap-2 px-8 py-3 text-sm font-medium text-white bg-gray-900 rounded-full shadow-lg hover:bg-gray-700 hover:shadow-xl transform transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                                     disabled={isLoading || isUpdateLoader}
                                     onClick={uploadMoreQuestions}
                                 >
                                     {isUpdateLoader ? (
-                                        <SpinnerLoader />
+                                        <SpinnerLoader className="w-4 h-4 text-white" />
                                     ) : (
-                                        <LuListCollapse className="text-lg" />
-                                    )}{" "}
-                                    Load More
+                                        <LuListCollapse className="w-5 h-5" />
+                                    )}
+                                    <span className="text-nowrap">{isUpdateLoader ? "Generating..." : "Load More"}</span>
                                 </button>
                             </div>
                         )}
                     </div>
                     {openLeanWordDrawer && (
-                        <div className="col-span-12 md:col-span-5">
+                        <div className="col-span-12 lg:col-span-4 transition-all duration-300 ease-in-out">
                             <Drawer
                                 isOpen={openLeanWordDrawer}
                                 onClose={() => setOpenLeanWordDrawer(false)}
                                 title={!isLoading && explanation?.title}
                             >
                                 {errorMsg && (
-                                    <p className="flex gap-2 text-sm text-amber-600 font-medium">
+                                    <p className="flex gap-2 text-sm text-red-600 font-medium">
                                         <AlertCircle className="mt-1" /> {errorMsg}
                                     </p>
                                 )}
