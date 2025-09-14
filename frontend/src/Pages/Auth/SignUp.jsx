@@ -137,7 +137,7 @@ const Signup = ({ setCurrentPage }) => {
 
         <button
           type="submit"
-          className="bg-blue-500 text-white py-2 rounded hover:bg-blue-600"
+          className="bg-blue-500 text-white py-2 rounded hover:bg-blue-600 cursor-pointer"
         >
           Sign Up
         </button>
@@ -147,7 +147,7 @@ const Signup = ({ setCurrentPage }) => {
         Already have an account?{" "}
         <button
           type="button"
-          className="text-blue-500 font-medium"
+          className="text-blue-500 font-medium cursor-pointer"
           onClick={() => setCurrentPage("login")}
         >
           Login
