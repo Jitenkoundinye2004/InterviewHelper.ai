@@ -1,3 +1,0 @@
-- [x] Fix className for the div containing buttons to use backticks for template literal
-- [x] Fix className for LuChevronDown icon to use backticks for template literal
-- [x] Fix style attribute for maxHeight to use backticks for template literal
