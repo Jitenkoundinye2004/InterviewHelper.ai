@@ -124,12 +124,12 @@ const Signup = ({ setCurrentPage }) => {
             placeholder="min. 8 characters"
             type={showPassword ? "text" : "password"}
             required
-            className="border rounded p-2 w-full"
+            className="border rounded p-2 w-full cursor-pointer"
           />
           <button
             type="button"
             onClick={() => setShowPassword(!showPassword)}
-            className="absolute inset-y-0 right-3 flex items-center text-gray-500"
+            className="absolute inset-y-0 right-3 flex items-center text-gray-500 cursor-pointer"
           >
             {showPassword ? <FiEyeOff size={20} /> : <FiEye size={20} />}
           </button>
@@ -137,7 +137,7 @@ const Signup = ({ setCurrentPage }) => {
 
         <button
           type="submit"
-          className="bg-blue-500 text-white py-2 rounded hover:bg-blue-600"
+          className="bg-blue-500 text-white py-2 rounded hover:bg-blue-600 cursor-pointer"
         >
           Sign Up
         </button>
@@ -147,7 +147,7 @@ const Signup = ({ setCurrentPage }) => {
         Already have an account?{" "}
         <button
           type="button"
-          className="text-blue-500 font-medium"
+          className="text-blue-500 font-medium cursor-pointer"
           onClick={() => setCurrentPage("login")}
         >
           Login
