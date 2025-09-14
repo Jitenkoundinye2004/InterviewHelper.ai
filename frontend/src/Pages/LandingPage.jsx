@@ -2,24 +2,24 @@ import React, { useContext, useState } from "react";
 import iprep from "../assets/iprep.png";
 import { useNavigate } from "react-router-dom";
 import { LuSparkles } from "react-icons/lu";
-import { app_features } from "../utils/data";
+import { FaUserCheck, FaChartLine, FaStar } from "react-icons/fa";
+import { BsFillLightningChargeFill } from "react-icons/bs";
 import Modal from "../components/Modal";
-import Login from "../Pages/Auth/Login"; // ✅ Make sure path/filename is correct
-import SignUp from "../Pages/Auth/SignUp"; // ✅ Needed if you want Sign Up too
+import Login from "../Pages/Auth/Login";
+import SignUp from "../Pages/Auth/SignUp";
 import { UserContext } from "../context/userContext";
 import ProfileInfoCard from "../components/Cards/ProfileInfoCard";
 
 const LandingPage = () => {
-  const {user} =useContext(UserContext);
+  const { user } = useContext(UserContext);
   const navigate = useNavigate();
   const [openAuthModal, setOpenAuthModal] = useState(false);
   const [currentPage, setCurrentPage] = useState("login"); // default login
 
   const handleCTA = () => {
-    if(!user){
-      setOpenAuthModal(true)
-    }else{
-
+    if (!user) {
+      setOpenAuthModal(true);
+    } else {
       navigate("/dashboard");
     }
   };
@@ -30,15 +30,17 @@ const LandingPage = () => {
       <div className="w-full min-h-screen bg-gradient-to-r from-yellow-50 to-white">
         {/* Navbar */}
         <header className="container mx-auto flex justify-between items-center px-6 py-6">
-          <div className="text-xl font-bold text-gray-800">InterviewHelper.ai</div>
+          <div className="text-xl font-bold text-gray-800">
+            InterviewHelper.ai
+          </div>
 
           {user ? (
             <ProfileInfoCard />
           ) : (
             <button
-              className="bg-blue-500 hover:bg-blue-500 text-white px-5 py-2 rounded-full transition"
+              className="bg-blue-500 hover:bg-blue-600 text-white px-5 py-2 rounded-full transition"
               onClick={() => {
-                setCurrentPage("login"); // open login first
+                setCurrentPage("login");
                 setOpenAuthModal(true);
               }}
             >
@@ -64,7 +66,7 @@ const LandingPage = () => {
               From preparation to mastery — your ultimate interview toolkit is here.
             </p>
             <button
-              className="bg-blue-500 text-white font-medium px-6 py-3 rounded-full hover:bg-blue-500 transition"
+              className="bg-blue-500 text-white font-medium px-6 py-3 rounded-full hover:bg-blue-600 transition"
               onClick={handleCTA}
             >
               Get Started
@@ -82,41 +84,84 @@ const LandingPage = () => {
         </section>
       </div>
 
-      {/* Features Section */}
+      {/* How It Works Section */}
+      <div className="w-full bg-gradient-to-r from-blue-50 to-indigo-50 py-20">
+        <div className="container mx-auto px-6">
+          <h2 className="text-2xl md:text-3xl font-semibold text-center mb-12">
+            ⚙ How It Works
+          </h2>
+          <div className="grid md:grid-cols-3 gap-8">
+            <div className="bg-white p-6 rounded-xl shadow hover:shadow-lg border border-gray-100 transition text-center">
+              <BsFillLightningChargeFill className="text-yellow-500 text-4xl mx-auto mb-4" />
+              <h3 className="text-lg font-semibold mb-2">1️⃣ Input Your Needs</h3>
+              <p className="text-gray-600">
+                Tell us about the job role, industry, and topics you want to focus on.
+              </p>
+            </div>
+
+            <div className="bg-white p-6 rounded-xl shadow hover:shadow-lg border border-gray-100 transition text-center">
+              <LuSparkles className="text-blue-500 text-4xl mx-auto mb-4" />
+              <h3 className="text-lg font-semibold mb-2">2️⃣ Get Customized Questions</h3>
+              <p className="text-gray-600">
+                Our AI instantly generates relevant questions tailored to your preferences.
+              </p>
+            </div>
+
+            <div className="bg-white p-6 rounded-xl shadow hover:shadow-lg border border-gray-100 transition text-center">
+              <FaChartLine className="text-green-500 text-4xl mx-auto mb-4" />
+              <h3 className="text-lg font-semibold mb-2">3️⃣ Practice and Improve</h3>
+              <p className="text-gray-600">
+                Answer questions, track progress, and receive feedback to build confidence.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* What You’ll Gain Section */}
       <div className="w-full bg-[#FFF8F0] py-20">
         <div className="container mx-auto px-6">
           <h2 className="text-2xl md:text-3xl font-semibold text-center mb-12">
-            Features that make you shine
+            🎯 What You’ll Gain
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {app_features.map((feature) => (
-              <div
-                key={feature.id}
-                className="bg-white p-6 rounded-xl shadow hover:shadow-lg border border-amber-100 transition"
-              >
-                <h3 className="text-lg font-semibold mb-2">{feature.title}</h3>
-                <p className="text-gray-600">{feature.description}</p>
-              </div>
-            ))}
+          <div className="grid md:grid-cols-3 gap-8">
+            <div className="bg-white p-6 rounded-xl shadow hover:shadow-xl border border-amber-100 transition text-center">
+              <FaUserCheck className="text-blue-500 text-4xl mx-auto mb-4" />
+              <h3 className="text-lg font-semibold mb-2">✅ Boost Your Confidence</h3>
+              <p className="text-gray-600">
+                Walk into your next interview fully prepared and stress-free.
+              </p>
+            </div>
+
+            <div className="bg-white p-6 rounded-xl shadow hover:shadow-xl border border-amber-100 transition text-center">
+              <FaStar className="text-yellow-500 text-4xl mx-auto mb-4" />
+              <h3 className="text-lg font-semibold mb-2">✅ Improve Your Skills</h3>
+              <p className="text-gray-600">
+                Develop the right skills and knowledge through guided practice.
+              </p>
+            </div>
+
+            <div className="bg-white p-6 rounded-xl shadow hover:shadow-xl border border-amber-100 transition text-center">
+              <FaChartLine className="text-green-500 text-4xl mx-auto mb-4" />
+              <h3 className="text-lg font-semibold mb-2">✅ Increase Your Chances</h3>
+              <p className="text-gray-600">
+                Stand out from the competition and maximize your chances of getting hired.
+              </p>
+            </div>
           </div>
         </div>
       </div>
 
       {/* Footer */}
       <footer className="text-sm text-gray-500 text-center p-6">
-        Made with ❤️ Happy Coding
+        Made with ❤ Happy Coding
       </footer>
 
-      {/* ✅ Auth Modal */}
+      {/* Auth Modal */}
       <Modal isOpen={openAuthModal} onClose={() => setOpenAuthModal(false)} hideHider>
         <div>
-          {currentPage === "login" && (
-            <Login setCurrentPage={setCurrentPage} />
-          )}
-
-          {currentPage === "signup" && (
-            <SignUp setCurrentPage={setCurrentPage} />
-          )}
+          {currentPage === "login" && <Login setCurrentPage={setCurrentPage} />}
+          {currentPage === "signup" && <SignUp setCurrentPage={setCurrentPage} />}
         </div>
       </Modal>
     </>
