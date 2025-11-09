@@ -8,7 +8,7 @@ import Modal from "../components/Modal";
 import Login from "../Pages/Auth/Login";
 import SignUp from "../Pages/Auth/SignUp";
 import { UserContext } from "../context/userContext";
-import ProfileInfoCard from "../components/Cards/profileInfoCard";
+import ProfileInfoCard from "../components/Cards/ProfileInfoCard";
 
 const LandingPage = () => {
   const { user } = useContext(UserContext);
@@ -38,7 +38,7 @@ const LandingPage = () => {
             <ProfileInfoCard />
           ) : (
             <button
-              className="bg-blue-500 hover:bg-blue-600 text-white px-5 py-2 rounded-full transition"
+              className="bg-blue-500 hover:bg-blue-600 text-white px-5 py-2 rounded-full transition cursor-pointer"
               onClick={() => {
                 setCurrentPage("login");
                 setOpenAuthModal(true);
@@ -66,7 +66,7 @@ const LandingPage = () => {
               From preparation to mastery — your ultimate interview toolkit is here.
             </p>
             <button
-              className="bg-blue-500 text-white font-medium px-6 py-3 rounded-full hover:bg-blue-600 transition"
+              className="bg-blue-500 text-white font-medium px-6 py-3 rounded-full hover:bg-blue-600 transition cursor-pointer"
               onClick={handleCTA}
             >
               Get Started

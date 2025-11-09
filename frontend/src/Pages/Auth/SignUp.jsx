@@ -20,6 +20,7 @@ const Signup = ({ setCurrentPage }) => {
 
   // ✅ Added error state
   const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
   const navigate = useNavigate();
 
@@ -51,6 +52,7 @@ const Signup = ({ setCurrentPage }) => {
     }
 
     setError("");
+    setIsLoading(true);
     // signup API call can be made here
     try {
       //Upload image if Present
@@ -78,6 +80,8 @@ const Signup = ({ setCurrentPage }) => {
       } else {
         setError("An error occurred. Please try again later.");
       }
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -137,9 +141,17 @@ const Signup = ({ setCurrentPage }) => {
 
         <button
           type="submit"
-          className="bg-blue-500 text-white py-2 rounded hover:bg-blue-600 cursor-pointer"
+          disabled={isLoading}
+          className="bg-blue-500 text-white py-2 rounded hover:bg-blue-600 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
         >
-          Sign Up
+          {isLoading ? (
+            <div className="flex items-center">
+              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+              Signing up...
+            </div>
+          ) : (
+            "Sign Up"
+          )}
         </button>
       </form>
 

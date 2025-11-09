@@ -1,0 +1,13 @@
+{
+  "dependencies": {
+    "@google/generative-ai": "^0.24.1",
+    "cluster": "^0.7.7",
+    "compression": "^1.8.1",
+    "express-rate-limit": "^8.2.1",
+    "ioredis": "^5.8.2",
+    "openai": "^6.8.1",
+    "pm2": "^6.0.13",
+    "redis": "^5.9.0",
+    "workbox-webpack-plugin": "^7.3.0"
+  }
+}

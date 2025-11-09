@@ -3,8 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import Input from "../../components/Inputs/Input"
 import axiosInstance from "../../utils/axiosInstance";
 import { API_PATHS } from "../../utils/apiPath";
-import { toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
+import toast from "react-hot-toast";
 
 
 const CreateSessionForm = ({ onSuccess }) => {
@@ -27,121 +26,41 @@ const CreateSessionForm = ({ onSuccess }) => {
         }));
     };
 
-    // const handleCreateSession = async (e) => {
-    //     e.preventDefault();
-
-    //     const { role, experience, topicsToFocus } = formData;
-
-    //     if (!role || !experience || !topicsToFocus) {
-    //         setError("Please fill all the required fields")
-    //         return
-    //     }
-    //     setError("");
-    //     setIsLoading(true);
-
-    //     try {
-    //         // First, generate interview questions using AI
-    //         console.log("Generating questions...");
-    //         const aiResponse = await axiosInstance.post(API_PATHS.AI.GENERATE_QUESTIONS, {
-    //             role,
-    //             experience: parseInt(experience),
-    //             topicsToFocus,
-    //             numberOfQuestions: 5, // Generate 5 questions by default
-    //         });
-
-    //         console.log("AI Response:", aiResponse.data);
-
-    //         if (aiResponse.data && Array.isArray(aiResponse.data)) {
-    //             // Then create session with the generated questions
-    //             const response = await axiosInstance.post(API_PATHS.SESSION.CREATE, {
-    //                 role,
-    //                 experience: parseInt(experience),
-    //                 topicsToFocus,
-    //                 description: formData.description,
-    //                 questions: aiResponse.data,
-    //             });
-
-    //             if (response.data.success) {
-    //                 // Success - call onSuccess callback to close modal and refresh dashboard
-    //                 if (onSuccess) {
-    //                     onSuccess();
-    //                 }
-    //                 // Navigate to the session
-    //                 navigate(`/InterviewPrep/${response.data.session._id}`);
-    //             } else {
-    //                 setError(response.data.message || 'Failed to create session');
-    //             }
-    //         } else {
-    //             setError('Failed to generate interview questions. Please try again.');
-    //         }
-    //     } catch (error) {
-    //         console.error("Error creating session: ", error?.response?.data || error?.message || error);
-    //         toast.error(error?.response?.data?.message || "Server error. Please try again.");
-    //     }
-    //     finally {
-    //         setIsLoading(false);
-    //     }
-    // };
-
 const handleCreateSession = async (e) => {
   e.preventDefault();
-
-  const { role, experience, topicsToFocus, description } = formData;
-
-  if (!role || !experience || !topicsToFocus) {
-    setError("Please fill all the required fields");
-    return;
-  }
-  setError("");
   setIsLoading(true);
+  setError(null);
 
   try {
-    // 1️⃣ Generate interview questions using AI
     console.log("Generating questions...");
-    console.log("Sending data:", { role, experience, topicsToFocus, numberOfQuestions: 5 });
-
     const aiResponse = await axiosInstance.post(API_PATHS.AI.GENERATE_QUESTIONS, {
-      role,
-      experience: parseInt(experience),
-      topicsToFocus,
-      numberOfQuestions: 5,            // default 5 questions
+      role: formData.role,
+      experience: parseInt(formData.experience),
+      topicsToFocus: formData.topicsToFocus,
+      numberOfQuestions: 5
+    }, {
+      timeout: 60000 // 60 seconds for AI generation
     });
 
-    console.log("AI Response:", aiResponse.data);
-
-    // The backend returns { questions: [...] }
-    const questions = aiResponse.data?.questions;
-
-    if (questions && Array.isArray(questions)) {
-      // 2️⃣ Create session with the generated questions
+    if (aiResponse.data?.questions) {
+      // Create session with generated questions
       const response = await axiosInstance.post(API_PATHS.SESSION.CREATE, {
-        role,
-        experience: parseInt(experience),
-        topicsToFocus,
-        description,
-        questions, // ✅ save generated questions
+        ...formData,
+        experience: parseInt(formData.experience),
+        questions: aiResponse.data.questions
       });
 
       if (response.data.success) {
         toast.success("Session created successfully!");
-
-        // Success - call onSuccess callback to close modal and refresh dashboard
-        if (onSuccess) {
-          onSuccess();
-        }
-        // Navigate to the session
-        navigate(`/InterviewPrep/${response.data.session._id}`);
-      } else {
-        setError(response.data.message || "Failed to create session");
-        toast.error(response.data.message || "Failed to create session");
+        if (onSuccess) onSuccess();
+        navigate(`/interview-prep/${response.data.session._id}`);
       }
-    } else {
-      setError("Failed to generate interview questions. Please try again.");
-      toast.error("Failed to generate interview questions. Please try again.");
     }
   } catch (error) {
-    console.error("Error creating session: ", error?.response?.data || error?.message || error);
-    toast.error(error?.response?.data?.error || error?.message || "Server error. Please try again.");
+    console.error("Error:", error.response?.data || error.message);
+    const errorMessage = error.code === 'ECONNABORTED' ? "Request timed out. Please try again." : (error.response?.data?.message || "Failed to create session");
+    setError(errorMessage);
+    toast.error(errorMessage);
   } finally {
     setIsLoading(false);
   }

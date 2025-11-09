@@ -1,6 +1,7 @@
 import User from "../models/User.js"
 import bcrypt from "bcryptjs"
 import jwt from "jsonwebtoken"
+import crypto from "crypto";
 
 
 //Generate JWT Token
@@ -103,4 +104,8 @@ const getUserProfile = async (req,res)=>{
     }
 }
 
-export { registerUser, loginUser, getUserProfile };
+export { 
+    registerUser, 
+    loginUser, 
+    getUserProfile
+};

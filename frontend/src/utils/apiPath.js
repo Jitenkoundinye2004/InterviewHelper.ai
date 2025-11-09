@@ -1,3 +1,4 @@
+// export const BASE_URL = "https://interviewhelper-ai.onrender.com";
 export const BASE_URL = "http://localhost:8000";
 
 export const API_PATHS = {
@@ -14,6 +15,7 @@ export const API_PATHS = {
   AI: {
     GENERATE_QUESTIONS: "/api/ai/generate-questions", // Generate interview questions and answers using Gemini
     GENERATE_EXPLANATION: "/api/ai/generate-explanation", // Generate concept explanation using Gemini
+    GENERATE_BULK_EXPLANATION: "/api/ai/generate-bulk-explanation",
   },
 
   SESSION: {

@@ -86,7 +86,7 @@ const Dashboard = () => {
         ? moment(data.updatedAt).format("Do MMM YYYY")
         : ""
     }
-    onselect={() => navigate(`/InterviewPrep/${data._id}`)}
+    onselect={() => navigate(`/interview-prep/${data._id}`)}
     onDelete={() => setOpenDeleteAlert({ open: true, data })}
   />
 ))}
@@ -95,8 +95,9 @@ const Dashboard = () => {
         </div>
 
         <button
-          className="h-12 md:h-12 flex items-center justify-center gap-3 bg-linear-to-r from-[#3B82F6] to-[#1E40AF] text-sm font-semibold text-white px-7 py-2.5 rounded-full hover:text-white transition-colors cursor-pointer hover:shadow-blue-300 fixed bottom-10 md:bottom-20 right-10 md:right-20"
+          className={`h-12 md:h-12 flex items-center justify-center gap-3 bg-linear-to-r from-[#3B82F6] to-[#1E40AF] text-sm font-semibold text-white px-7 py-2.5 rounded-full hover:text-white transition-all duration-300 cursor-pointer hover:shadow-blue-300 fixed bottom-10 md:bottom-20 right-10 md:right-20 ${openCreateModal ? 'opacity-0 scale-90' : 'opacity-100 scale-100'}`}
           onClick={() => setOpenCreateModal(true)}
+          disabled={openCreateModal}
         >
           <LuPlus className="text-2xl text-white" />
           Add New
@@ -119,7 +120,7 @@ const Dashboard = () => {
         >
           <div className="w=[30vw]">
             <DeleteAlertContent
-            content = "Are you sure yo want to delete this session details?"
+            content = "Are you sure you want to delete this session details?"
             onDelete={()=>{
               deleteSession(openDeleteAlert.data)
             }} 
@@ -131,12 +132,3 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
-
-
-
-
-
-
-
-
-

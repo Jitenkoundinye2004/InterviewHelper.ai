@@ -1,8 +1,10 @@
-import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from "react-router-dom";
+import React, { useState, useEffect, useRef, useContext } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import moment from "moment";
 import { AnimatePresence, motion } from "framer-motion";
 import { AlertCircle } from "lucide-react";
+import jsPDF from 'jspdf';
+import { marked } from 'marked';
 
 import { toast } from "react-hot-toast";
 import DashboardLayout from "../../components/layouts/DashboardLayout";
@@ -10,16 +12,19 @@ import RoleInfoHeader from "../../components/RoleInfoHeader";
 import axiosInstance from '../../utils/axiosInstance';
 import { API_PATHS } from '../../utils/apiPath';
 import QuestionCard from '../../components/Cards/QuestionCard';
-import AIResponsePreview from './components/AIResponsePreview';
+import AIResponsePreview from '../../Pages/InterviewPrep/components/AIResponsePreview';
 import Drawer from '../../components/Drawer';
 import SkeletonLoader from '../../components/Loader/SkeletonLoader';
-import { LuListCollapse } from 'react-icons/lu';
+import { LuDownload, LuListCollapse } from 'react-icons/lu';
 import SpinnerLoader from '../../components/Loader/SpinnerLoader';
+import { UserContext } from '../../context/userContext';
 
 
 const InterviewPrepPage = () => {
     const { sessionId } = useParams();
     const navigate = useNavigate();
+    const { setUser } = useContext(UserContext);
+    const hasFetched = useRef(false);
 
     const [sessionData, setSessionData] = useState(null);
     const [errorMsg, setErrorMsg] = useState("");
@@ -29,6 +34,7 @@ const InterviewPrepPage = () => {
 
     const [isLoading, setIsLoading] = useState(true);
     const [isUpdateLoader, setIsUpdateLoader] = useState(false);
+    const [isPdfLoading, setIsPdfLoading] = useState(false);
 
     const fetchSessionDetailsById = async () => {
         try {
@@ -58,6 +64,11 @@ const InterviewPrepPage = () => {
             } else if (error.response?.status === 404) {
                 setErrorMsg("Session not found.");
             } else if (error.response?.status === 401) {
+                toast.error("Session expired. Please log in again.");
+                setUser(null);
+                localStorage.removeItem("authToken");
+                navigate("/");
+            } else if (error.response?.status === 401) {
                 setErrorMsg("You are not authorized to access this session.");
             } else {
                 setErrorMsg(
@@ -72,23 +83,24 @@ const InterviewPrepPage = () => {
 
     const generateConceptExplanation = async (question) => {
         try {
-            setErrorMsg("")
-            setExplanation(null)
             setIsLoading(true);
-            setOpenLeanWordDrawer(true);
-            const response = await axiosInstance.post(API_PATHS.AI.GENERATE_EXPLANATION, { concept: question });
+            setErrorMsg("");
+
+            const response = await axiosInstance.post(API_PATHS.AI.GENERATE_EXPLANATION, {
+                question: question // Make sure to send the question property
+            });
 
             if (response.data) {
-                setExplanation(response.data)
+                setExplanation(response.data);
+                setOpenLeanWordDrawer(true);
             }
         } catch (error) {
-            setExplanation(null)
-            setErrorMsg("Failed to generate explanation, Try again later")
-            console.error("Error:", error)
+            console.error("Error:", error);
+            setErrorMsg(error.response?.data?.message || "Failed to generate explanation");
         } finally {
-            setIsLoading(false)
+            setIsLoading(false);
         }
-    }
+    };
 
     const toggleQuestionPinStatus = async (questionId) => {
         try {
@@ -96,7 +108,6 @@ const InterviewPrepPage = () => {
                 API_PATHS.QUESTION.PIN(questionId)
             );
             console.log(response);
-
             if (response.data && response.data.question) {
                 fetchSessionDetailsById();
             }
@@ -181,11 +192,106 @@ const InterviewPrepPage = () => {
         }
     }
 
+    const handleDownloadPdf = async () => {
+        if (!sessionData) return;
+
+        setIsPdfLoading(true);
+        toast.loading("Generating PDF... This may take a moment.", { id: "pdf-toast" });
+
+        try {
+            // Fetch all explanations in a single batch request for speed
+            const response = await axiosInstance.post(API_PATHS.AI.GENERATE_BULK_EXPLANATION, {
+                questions: sessionData.questions.map(qa => qa.question)
+            });
+
+            const detailedAnswers = response.data.explanations;
+
+            toast.loading("Compiling PDF...", { id: "pdf-toast" }
+            );
+            
+            const title = `Interview Prep: ${sessionData.role}`;
+            const subtitle = `Experience: ${sessionData.experience} years | Topics: ${sessionData.topicsToFocus}`;
+
+            let htmlString = `
+                <style>
+                    body { font-family: Helvetica, sans-serif; line-height: 1.6; color: #333; }
+                    h1 { font-size: 24px; color: #1a202c; border-bottom: 2px solid #4a90e2; padding-bottom: 10px; margin-bottom: 5px; }
+                    h2 { font-size: 18px; color: #2d3748; margin-top: 20px; font-weight: bold; }
+                    p { margin-top: 5px; margin-bottom: 10px; }
+                    pre { background-color: #f7fafc; border: 1px solid #e2e8f0; padding: 12px; border-radius: 6px; white-space: pre-wrap; word-wrap: break-word; font-size: 13px; }
+                    code { font-family: "Courier New", Courier, monospace; background-color: #edf2f7; padding: 2px 4px; border-radius: 4px; font-size: 90%; }
+                    pre code { background-color: transparent; padding: 0; border-radius: 0; }
+                    blockquote { border-left: 4px solid #a0aec0; padding-left: 15px; color: #4a5568; font-style: italic; margin-left: 0; }
+                    ul, ol { padding-left: 25px; margin-bottom: 10px; }
+                    li { margin-bottom: 5px; }
+                    hr { border: 0; border-top: 1px solid #e2e8f0; margin: 25px 0; }
+                    .subtitle { font-size: 12px; color: #718096; margin-bottom: 20px; }
+                    .qa-block { margin-bottom: 20px; page-break-inside: avoid; }
+                </style>
+                <h1>${title}</h1>
+                <p class="subtitle">${subtitle}</p>
+            `;
+
+            for (let i = 0; i < sessionData.questions.length; i++) {
+                const qa = sessionData.questions[i];
+                const detailedAnswer = detailedAnswers[i]?.explanation || qa.answer;
+                const answerHtml = marked(detailedAnswer, { breaks: true });
+
+                htmlString += `
+                    <div class="qa-block">
+                        <h2>Q${i + 1}: ${qa.question}</h2>
+                        <div>${answerHtml}</div>
+                    </div>
+                    ${i < sessionData.questions.length - 1 ? '<hr />' : ''}
+                `;
+            }
+
+            const doc = new jsPDF();
+            await doc.html(htmlString, {
+                x: 15,
+                y: 15,
+                width: 180,
+                windowWidth: 800,
+                callback: function (docInstance) {
+                    const pageCount = docInstance.internal.getNumberOfPages();
+                    for (let i = 1; i <= pageCount; i++) {
+                        docInstance.setPage(i);
+                        docInstance.setFontSize(10);
+                        docInstance.setTextColor(150);
+                        docInstance.text(
+                            `Page ${i} of ${pageCount}`,
+                            docInstance.internal.pageSize.getWidth() - 20,
+                            docInstance.internal.pageSize.getHeight() - 10,
+                            { align: 'right' }
+                        );
+                    }
+                    docInstance.save(`${sessionData.role.replace(/\s+/g, '_')}_interview_prep.pdf`);
+                }
+            });
+
+            toast.success("PDF downloaded successfully!", { id: "pdf-toast" });
+        } catch (error) {
+            console.error("Error generating PDF:", error);
+            const errorMessage = error.response?.data?.message || "Failed to generate detailed PDF.";
+            toast.error(errorMessage, { id: "pdf-toast" });
+        } finally {
+            setIsPdfLoading(false);
+        }
+    };
+
+
+
+
+    
+
     useEffect(() => {
         if (sessionId) {
-            fetchSessionDetailsById();
+            if (!hasFetched.current) {
+                fetchSessionDetailsById();
+                hasFetched.current = true;
+            }
         }
-        return () => { }
+        return () => { hasFetched.current = false; }
     }, [sessionId]);
 
     return (
@@ -203,7 +309,21 @@ const InterviewPrepPage = () => {
                 }
             />
             <div className="container mx-auto py-8 px-4 sm:px-6 lg:px-8">
-                <h2 className="text-xl font-bold text-gray-800 mb-8">Interview Q & A</h2>
+                <div className="flex justify-between items-center mb-8">
+                    <h2 className="text-xl font-bold text-gray-800">Interview Q & A</h2>
+                    <button
+                        onClick={handleDownloadPdf}
+                        className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-gray-900 rounded-lg shadow-sm hover:bg-gray-700 disabled:opacity-50"
+                        disabled={!sessionData || sessionData.questions.length === 0 || isLoading || isPdfLoading}
+                    >
+                        {isPdfLoading ? (
+                            <SpinnerLoader className="w-4 h-4 text-white" />
+                        ) : (
+                            <LuDownload className="w-4 h-4" />
+                        )}
+                        {isPdfLoading ? "Generating..." : "Download PDF"}
+                    </button>
+                </div>
 
                 {errorMsg && (
                     <div className="mb-6 p-4 bg-red-100 border border-red-300 rounded-lg shadow-sm">
@@ -215,14 +335,18 @@ const InterviewPrepPage = () => {
 
                 {isLoading && (
                     <div className="mb-6 p-4 bg-blue-100 border border-red-300 rounded-lg shadow-sm">
-                        <p className="text-blue-700 font-medium flex items-center gap-2">
+                        {/* <p className="text-blue-700 font-medium flex items-center gap-2">
                             <SpinnerLoader className="w-5 h-5" /> Loading session data...
+                        </p> */}
+                        <p className="text-blue-700 font-medium flex items-center gap-2">
+                            <SpinnerLoader className="w-5 h-5" />
+                            Loading...
                         </p>
                     </div>
                 )}
 
                 <div className="grid grid-cols-12 gap-8">
-                    <div className={`col-span-12 transition-all duration-300 ease-in-out ${openLeanWordDrawer ? "lg:col-span-8" : "lg:col-span-12"}`}>
+                    <div className={`col-span-12 transition-all duration-300 ease-in-out`} style={{ overflowY: "auto", maxHeight: "calc(100vh - 200px)" }}>
                         <AnimatePresence>
                             {sessionData?.questions?.length === 0 && !isLoading && (
                                 <div className="text-center py-12">
@@ -245,15 +369,16 @@ const InterviewPrepPage = () => {
                                         }}
                                         layout
                                         layoutId={`question-${data._id || index}`}
-                                        className="mb-4 p-5 bg-white rounded-xl shadow-md transform transition-all hover:scale-[1.01] hover:shadow-lg"
+                                        className="mb-4"
                                     >
                                         <QuestionCard
-                                            question={data?.question}
-                                            answer={data?.answer}
-                                            onLearnMore={() =>
-                                                generateConceptExplanation(data.question)}
-                                            isPinned={data?.isPinned}
+                                            key={data._id}
+                                            question={data.question}
+                                            answer={data.answer}
+                                            isPinned={data.isPinned}
                                             onTogglePin={() => toggleQuestionPinStatus(data._id)}
+                                            onLearnMore={() => generateConceptExplanation(data.question)}
+                                            isDrawerOpen={openLeanWordDrawer}
                                         />
                                     </motion.div>
                                 );
@@ -277,26 +402,26 @@ const InterviewPrepPage = () => {
                             </div>
                         )}
                     </div>
-                    {openLeanWordDrawer && (
-                        <div className="col-span-12 lg:col-span-4 transition-all duration-300 ease-in-out">
-                            <Drawer
-                                isOpen={openLeanWordDrawer}
-                                onClose={() => setOpenLeanWordDrawer(false)}
-                                title={!isLoading && explanation?.title}
-                            >
-                                {errorMsg && (
-                                    <p className="flex gap-2 text-sm text-red-600 font-medium">
-                                        <AlertCircle className="mt-1" /> {errorMsg}
-                                    </p>
-                                )}
-                                {isLoading && <SkeletonLoader />}
-                                {!isLoading && explanation && (
-                                    <AIResponsePreview content={explanation?.explanation} />
-                                )}
-                            </Drawer>
-                        </div>
-                    )}
                 </div>
+                <AnimatePresence>
+                    {openLeanWordDrawer && (
+                        <Drawer
+                            isOpen={openLeanWordDrawer}
+                            onClose={() => setOpenLeanWordDrawer(false)}
+                            title={!isLoading && explanation?.title}
+                        >
+                            {errorMsg && (
+                                <p className="flex gap-2 text-sm text-red-600 font-medium">
+                                    <AlertCircle className="mt-1" /> {errorMsg}
+                                </p>
+                            )}
+                            {isLoading && <SkeletonLoader />}
+                            {!isLoading && explanation && (
+                                <AIResponsePreview content={explanation?.explanation} />
+                            )}
+                        </Drawer>
+                    )}
+                </AnimatePresence>
             </div>
         </DashboardLayout>
     )

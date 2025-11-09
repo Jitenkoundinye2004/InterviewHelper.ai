@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import Session from "../models/Session.js";
 import Question from "../models/Question.js";
+import cache from "../utils/cache.js";
 
 // @desc Create a new session and linked questions
 // @route POST /api/sessions
@@ -36,6 +37,9 @@ export const createSession = async (req, res) => {
     session.questions = questionDocs;
     await session.save();
 
+    // Invalidate user sessions cache
+    await cache.invalidateUserSessions(userId);
+
     res.status(201).json({ success: true, session });
   } catch (err) {
     console.error("Error creating session:", err);
@@ -48,9 +52,21 @@ export const createSession = async (req, res) => {
 // @access Private
 export const getMySessions = async (req, res) => {
   try {
-    const sessions = await Session.find({ user: req.user._id })
-      .sort({ createdAt: -1 })
-      .populate("questions");
+    const userId = req.user._id.toString();
+    const cacheKey = cache.getSessionKey(userId);
+
+    // Try to get from cache first
+    let sessions = await cache.getCachedSessions(userId);
+
+    if (!sessions) {
+      // Cache miss - fetch from database
+      sessions = await Session.find({ user: req.user._id })
+        .sort({ createdAt: -1 })
+        .populate("questions");
+
+      // Cache the result
+      await cache.setCachedSessions(userId, sessions);
+    }
 
     res.status(200).json(sessions);
   } catch (err) {
@@ -119,6 +135,9 @@ export const deleteSession = async (req, res) => {
 
     // Then delete the session
     await session.deleteOne();
+
+    // Invalidate user sessions cache
+    await cache.invalidateUserSessions(req.user._id);
 
     res.status(200).json({ success: true, message: "Session deleted successfully" });
   } catch (err) {

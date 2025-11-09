@@ -11,6 +11,7 @@ const Login = ({ setCurrentPage }) => {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
   const {updateUser} = useContext(UserContext);
   const navigate = useNavigate();
@@ -30,37 +31,40 @@ const Login = ({ setCurrentPage }) => {
       return;
     }
 
-    if(password.length < 8){ 
+    if(password.length < 8){
       setError("Password must be at least 8 characters long.");
       return;
     }
 
     // Clear previous error
     setError("");
+    setIsLoading(true);
 
     // ✅ Now navigate only after validations pass
-    
+
     // login API call can be made here
     try {
       const response =await axiosInstance.post(API_PATHS.AUTH.LOGIN,{
         email,
         password
       });
-      
+
       const{token} = response.data;
-      
+
       if(token){
         localStorage.setItem("token",token);
         updateUser(response.data)
         navigate("/dashboard");
       }
-      
+
     } catch (error) {
       if (error.response && error.response.data.message) {
         setError(error.response.data.message);
-      } else {  
+      } else {
         setError("An error occurred. Please try again later.");
       }
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -104,9 +108,17 @@ const Login = ({ setCurrentPage }) => {
 
         <button
           type="submit"
-          className="bg-blue-500 text-white py-2 rounded hover:bg-blue-600 cursor-pointer"
+          disabled={isLoading}
+          className="bg-blue-500 text-white py-2 rounded hover:bg-blue-600 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
         >
-          Login
+          {isLoading ? (
+            <div className="flex items-center">
+              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+              Logging in...
+            </div>
+          ) : (
+            "Login"
+          )}
         </button>
       </form>
 
