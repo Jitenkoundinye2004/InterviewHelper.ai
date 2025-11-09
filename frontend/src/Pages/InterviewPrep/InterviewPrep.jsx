@@ -83,11 +83,8 @@ const InterviewPrepPage = () => {
 
     const generateConceptExplanation = async (question) => {
         try {
-<<<<<<< HEAD
-=======
             setErrorMsg("")
             setExplanation(null)
->>>>>>> 5e506d1fb0f2d5b3963692aaecb14d5ff050bcfa
             setIsLoading(true);
             setErrorMsg("");
 
