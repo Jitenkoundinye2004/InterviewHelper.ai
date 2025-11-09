@@ -83,6 +83,11 @@ const InterviewPrepPage = () => {
 
     const generateConceptExplanation = async (question) => {
         try {
+<<<<<<< HEAD
+=======
+            setErrorMsg("")
+            setExplanation(null)
+>>>>>>> 5e506d1fb0f2d5b3963692aaecb14d5ff050bcfa
             setIsLoading(true);
             setErrorMsg("");
 
@@ -309,6 +314,7 @@ const InterviewPrepPage = () => {
                 }
             />
             <div className="container mx-auto py-8 px-4 sm:px-6 lg:px-8">
+<<<<<<< HEAD
                 <div className="flex justify-between items-center mb-8">
                     <h2 className="text-xl font-bold text-gray-800">Interview Q & A</h2>
                     <button
@@ -324,6 +330,9 @@ const InterviewPrepPage = () => {
                         {isPdfLoading ? "Generating..." : "Download PDF"}
                     </button>
                 </div>
+=======
+                <h2 className="text-xl font-bold text-gray-800 mb-8">Interview Q & A</h2>
+>>>>>>> 5e506d1fb0f2d5b3963692aaecb14d5ff050bcfa
 
                 {errorMsg && (
                     <div className="mb-6 p-4 bg-red-100 border border-red-300 rounded-lg shadow-sm">
@@ -335,18 +344,27 @@ const InterviewPrepPage = () => {
 
                 {isLoading && (
                     <div className="mb-6 p-4 bg-blue-100 border border-red-300 rounded-lg shadow-sm">
+<<<<<<< HEAD
                         {/* <p className="text-blue-700 font-medium flex items-center gap-2">
                             <SpinnerLoader className="w-5 h-5" /> Loading session data...
                         </p> */}
                         <p className="text-blue-700 font-medium flex items-center gap-2">
                             <SpinnerLoader className="w-5 h-5" />
                             Loading...
+=======
+                        <p className="text-blue-700 font-medium flex items-center gap-2">
+                            <SpinnerLoader className="w-5 h-5" /> Loading session data...
+>>>>>>> 5e506d1fb0f2d5b3963692aaecb14d5ff050bcfa
                         </p>
                     </div>
                 )}
 
                 <div className="grid grid-cols-12 gap-8">
+<<<<<<< HEAD
                     <div className={`col-span-12 transition-all duration-300 ease-in-out`} style={{ overflowY: "auto", maxHeight: "calc(100vh - 200px)" }}>
+=======
+                    <div className={`col-span-12 transition-all duration-300 ease-in-out ${openLeanWordDrawer ? "lg:col-span-8" : "lg:col-span-12"}`} style={{ overflowY: openLeanWordDrawer ? "hidden" : "auto", maxHeight: "calc(100vh - 200px)" }}>
+>>>>>>> 5e506d1fb0f2d5b3963692aaecb14d5ff050bcfa
                         <AnimatePresence>
                             {sessionData?.questions?.length === 0 && !isLoading && (
                                 <div className="text-center py-12">
@@ -369,7 +387,11 @@ const InterviewPrepPage = () => {
                                         }}
                                         layout
                                         layoutId={`question-${data._id || index}`}
+<<<<<<< HEAD
                                         className="mb-4"
+=======
+                                        className="mb-4 p-5 bg-white rounded-xl shadow-md transform transition-all hover:scale-[1.01] hover:shadow-lg"
+>>>>>>> 5e506d1fb0f2d5b3963692aaecb14d5ff050bcfa
                                     >
                                         <QuestionCard
                                             key={data._id}
@@ -402,6 +424,28 @@ const InterviewPrepPage = () => {
                             </div>
                         )}
                     </div>
+<<<<<<< HEAD
+=======
+                    {openLeanWordDrawer && (
+                        <div className="col-span-12 lg:col-span-4 transition-all duration-300 ease-in-out">
+                            <Drawer
+                                isOpen={openLeanWordDrawer}
+                                onClose={() => setOpenLeanWordDrawer(false)}
+                                title={!isLoading && explanation?.title}
+                            >
+                                {errorMsg && (
+                                    <p className="flex gap-2 text-sm text-red-600 font-medium">
+                                        <AlertCircle className="mt-1" /> {errorMsg}
+                                    </p>
+                                )}
+                                {isLoading && <SkeletonLoader />}
+                                {!isLoading && explanation && (
+                                    <AIResponsePreview content={explanation?.explanation} />
+                                )}
+                            </Drawer>
+                        </div>
+                    )}
+>>>>>>> 5e506d1fb0f2d5b3963692aaecb14d5ff050bcfa
                 </div>
                 <AnimatePresence>
                     {openLeanWordDrawer && (
