@@ -34,7 +34,7 @@ app.use(limiter);
 // CORS middleware
 app.use(
     cors({
-        origin: ['http://localhost:5173', 'http://localhost:3000'],
+        origin: ['https://interviewhelper-ai-frontend.onrender.com', 'https://interviewhelper-ai.onrender.com'],
         methods:["GET","POST","PUT","DELETE"],
         allowedHeaders:["Content-Type","Authorization"],
         credentials: true
