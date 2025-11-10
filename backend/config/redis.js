@@ -16,7 +16,6 @@ const redis = new Redis({
 
 redis.on('connect', () => console.log('Redis connected'));
 redis.on('error', (err) => {
-  // Only log non-connection errors to avoid spam when Redis is not running
   if (!err.message.includes('ECONNREFUSED')) {
     console.error('Redis error:', err);
   }

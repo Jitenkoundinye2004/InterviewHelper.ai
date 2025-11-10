@@ -134,6 +134,12 @@ export const generateConceptExplanation = async (req, res) => {
     }
   } catch (error) {
     console.error("Error generating explanation:", error);
+
+    // Check for rate limit error (status code 429)
+    if (error.status === 429 || (error.message && error.message.includes("429"))) {
+      return res.status(429).json({ message: "You have exceeded the API request limit. Please try again later." });
+    }
+
     return res.status(500).json({
       message: "Failed to generate explanation",
       error: error.message
@@ -141,6 +147,11 @@ export const generateConceptExplanation = async (req, res) => {
   }
 };
 
+// Helper function to introduce a delay
+const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
+const BATCH_SIZE = 5; // Number of questions to process in one chunk
+const DELAY_BETWEEN_BATCHES = 1000; // 1 second delay
 /**
  * POST /api/ai/generate-bulk-explanation
  */
@@ -163,39 +174,53 @@ export const generateBulkExplanation = async (req, res) => {
     }
 
     const explanations = [];
-    for (const question of questions) {
-        const prompt = `Explain the following interview question / concept in detail: "${question}"
-        Return JSON: { "title": "...", "explanation": "..." }`;
+    // Process questions in batches to avoid hitting rate limits
+    for (let i = 0; i < questions.length; i += BATCH_SIZE) {
+        const batch = questions.slice(i, i + BATCH_SIZE);
+        console.log(`Processing batch ${i / BATCH_SIZE + 1}...`);
 
-        const promptHash = crypto.createHash('md5').update(prompt).digest('hex');
-        const singleCached = await cache.getCachedAIResponse(promptHash);
+        const batchPromises = batch.map(async (question) => {
+            const prompt = `Explain the following interview question / concept in detail: "${question}"
+            Return JSON: { "title": "...", "explanation": "..." }`;
 
-        if (singleCached) {
-            explanations.push(singleCached);
-            continue;
-        }
+            const promptHash = crypto.createHash('md5').update(prompt).digest('hex');
+            const singleCached = await cache.getCachedAIResponse(promptHash);
 
-        try {
-            const modelId = getModelId();
-            const model = genAI.getGenerativeModel({ model: modelId });
-            const result = await model.generateContent(prompt);
-            const rawText = result?.response?.text?.() ?? String(result);
-
-            try {
-                const data = JSON.parse(rawText.replace(/^```json\s*/i, "").replace(/```$/i, "").trim());
-                await cache.setCachedAIResponse(promptHash, data);
-                explanations.push(data);
-            } catch (parseErr) {
-                const fallbackData = { title: question, explanation: rawText };
-                await cache.setCachedAIResponse(promptHash, fallbackData);
-                explanations.push(fallbackData);
+            if (singleCached) {
+                return singleCached;
             }
-        } catch (individualError) {
-            console.error(`Error generating explanation for question: "${question}"`, individualError.message);
-            explanations.push({
-                title: question,
-                explanation: `Sorry, an error occurred while generating an explanation for this question. Please try again.`,
-            });
+
+            // If not cached, generate it
+            try {
+                const modelId = getModelId();
+                const model = genAI.getGenerativeModel({ model: modelId });
+                const result = await model.generateContent(prompt);
+                const rawText = result?.response?.text?.() ?? String(result);
+
+                try {
+                    const data = JSON.parse(rawText.replace(/^```json\s*/i, "").replace(/```$/i, "").trim());
+                    await cache.setCachedAIResponse(promptHash, data);
+                    return data;
+                } catch (parseErr) {
+                    const fallbackData = { title: question, explanation: rawText };
+                    await cache.setCachedAIResponse(promptHash, fallbackData);
+                    return fallbackData;
+                }
+            } catch (individualError) {
+                console.error(`Error generating explanation for question: "${question}"`, individualError.message);
+                return {
+                    title: question,
+                    explanation: `Sorry, an error occurred while generating an explanation for this question. Please try again.`,
+                };
+            }
+        });
+
+        const batchResults = await Promise.all(batchPromises);
+        explanations.push(...batchResults);
+
+        // Add a delay before the next batch to respect rate limits
+        if (i + BATCH_SIZE < questions.length) {
+            await delay(DELAY_BETWEEN_BATCHES);
         }
     }
 
@@ -208,6 +233,11 @@ export const generateBulkExplanation = async (req, res) => {
 
   } catch (error) {
     // Check for specific Gemini API errors (e.g., invalid key, rate limits)
+    if (error.status === 429 || (error.message && error.message.includes("429"))) {
+      console.error("Gemini API rate limit exceeded:", error.message);
+      return res.status(429).json({ message: "You have exceeded the API request limit. Please try again later." });
+    }
+
     if (error.message.includes("API key not valid")) {
       console.error("Gemini API key is invalid:", error.message);
       return res.status(401).json({ message: "AI API key is invalid. Please check your server configuration." });

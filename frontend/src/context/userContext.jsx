@@ -4,7 +4,7 @@ import { API_PATHS } from "../utils/apiPath.js";
 
 export const UserContext = createContext();
 
-const UserProvider = ({ children }) => {
+const UserContextProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true); // New state to track loading
 
@@ -32,9 +32,11 @@ const UserProvider = ({ children }) => {
 },[]);
 
 const updateUser =(userData)=>{
-    setUser(userData);
-    localStorage.setItem("token",userData.token);
-    setLoading(false);
+  if (userData && userData.token) {
+    localStorage.setItem("token", userData.token);
+  }
+  setUser(userData); // This can be user object or null on logout
+  if (loading) setLoading(false);
 };
 
 
@@ -51,4 +53,4 @@ return(
 );
 };
 
-export default UserProvider;
+export default UserContextProvider;

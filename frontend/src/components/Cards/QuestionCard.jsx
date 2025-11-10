@@ -3,7 +3,6 @@ import { LuChevronDown, LuPin, LuPinOff, LuSparkles } from 'react-icons/lu';
 import AIResponsePreview from '../../Pages/InterviewPrep/components/AIResponsePreview';
 
 const QuestionCard = ({
-<<<<<<< HEAD
   question,
   answer,
   onLearnMore,
@@ -19,7 +18,7 @@ const QuestionCard = ({
   // Smooth expand/collapse animation and height recalculation
   useEffect(() => {
     if (isExpanded) {
-      // Use a timeout to ensure all child content (like AIResponsePreview content) 
+      // Use a timeout to ensure all child content (like AIResponsePreview content)
       // has fully rendered before calculating scrollHeight. This addresses clipping issues.
       const timer = setTimeout(() => {
         const contentHeight = contentRef.current?.scrollHeight || 0;
@@ -30,41 +29,29 @@ const QuestionCard = ({
       setHeight(0);
     }
   // The height must recalculate if the content changes while expanded
-  }, [isExpanded, answer]); 
-=======
-    question,
-    answer,
-    onLearnMore,
-    isPinned,
-    onTogglePin,
-    isDrawerOpen // 👈 pass drawer state here
-}) => {
-    const [isExpanded, setIsExpanded] = useState(false);
-    const [height, setHeight] = useState(0);
-    const contentRef = useRef(null);
->>>>>>> 5e506d1fb0f2d5b3963692aaecb14d5ff050bcfa
+  }, [isExpanded, answer]);
 
   // Drawer offset logic (responsive margin)
   useEffect(() => {
     const computeOffset = () => {
       const vw = window.innerWidth || document.documentElement.clientWidth;
       const isMdUp = vw >= 768;
-      
+
       if (isDrawerOpen && isMdUp) {
-        
-        // --- 🚨 CRITICAL ADJUSTMENT POINT 🚨 --- 
-        // 
+
+        // --- 🚨 CRITICAL ADJUSTMENT POINT 🚨 ---
+        //
         // The original code assumes the drawer is 40% of the viewport width.
-        // IF YOUR DRAWER IS A FIXED PIXEL WIDTH (e.g., 400px), 
+        // IF YOUR DRAWER IS A FIXED PIXEL WIDTH (e.g., 400px),
         // COMMENT OUT THE NEXT TWO LINES AND USE THE ALTERNATIVE BELOW.
-        const offset = Math.round(vw * 0.4); 
+        const offset = Math.round(vw * 0.4);
         setRightOffsetPx(offset);
 
         // --- ALTERNATIVE FOR FIXED WIDTH DRAWER (UNCOMMENT AND ADJUST VALUE IF NEEDED) ---
         // const fixedDrawerWidth = 400; // <-- CHANGE THIS TO YOUR ACTUAL PIXEL WIDTH
         // setRightOffsetPx(fixedDrawerWidth);
         // -----------------------------------------------------------------------------------
-        
+
       } else {
         setRightOffsetPx(0);
       }
@@ -74,13 +61,12 @@ const QuestionCard = ({
     return () => window.removeEventListener('resize', computeOffset);
   }, [isDrawerOpen]);
 
-<<<<<<< HEAD
   const toggleExpand = () => setIsExpanded((prev) => !prev);
 
   // Apply responsive spacing based on the calculated offset
   const containerStyle = {
     // Adds the drawer width + 20px padding
-    marginRight: rightOffsetPx ? `${rightOffsetPx + 20}px` : undefined, 
+    marginRight: rightOffsetPx ? `${rightOffsetPx + 20}px` : undefined,
     transition: 'all 0.3s ease',
   };
 
@@ -164,7 +150,7 @@ const QuestionCard = ({
           ref={contentRef}
           className="mt-4 text-gray-700 bg-gray-50 px-5 py-3 rounded-xl border border-gray-100"
         >
-          <AIResponsePreview content={answer} /> 
+          <AIResponsePreview content={answer} />
         </div>
       </div>
     </div>
@@ -172,68 +158,3 @@ const QuestionCard = ({
 };
 
 export default QuestionCard;
-=======
-    return (
-        <div
-            className={`bg-white rounded-lg mb-4 overflow-hidden py-4 px-5 shadow-xl shadow-gray-100/70 border border-gray-100/60 group transition-all duration-300 ${
-                isDrawerOpen ? "md:mr-[40vw]" : "md:mr-0"
-            }`} // 👈 push content left when drawer open
-        >
-            <div className="flex items-start gap-3.5">
-                <span className="text-xs md:text-[15px] font-semibold text-gray-400 leading-[18px]">Q</span>
-                <h3
-                    className="text-xs md:text-[14px] font-medium text-gray-800 mr-0 md:mr-20 cursor-pointer"
-                    onClick={toggleExpand}
-                >
-                    {question}
-                </h3>
-                <div className="flex items-center justify-end ml-auto relative">
-                    <div
-                        className={`flex ${isExpanded ? "md:flex" : "md:hidden group-hover:flex"}`}
-                    >
-                        <button
-                            className="flex items-center gap-2 text-xs text-indigo-800 font-medium bg-indigo-50 px-3 py-1 mr-2 rounded border border-indigo-50 hover:border-indigo-200 cursor-pointer"
-                            onClick={onTogglePin}
-                        >
-                            {isPinned ? <LuPinOff className="text-xs" /> : <LuPin className="text-xs" />}
-                        </button>
-
-                        <button
-                            className="flex items-center gap-2 text-xs text-cyan-800 font-medium bg-cyan-50 px-3 py-1 mr-2 rounded border border-cyan-50 hover:border-cyan-200 cursor-pointer"
-                            onClick={() => {
-                                setIsExpanded(true);
-                                onLearnMore();
-                            }}
-                        >
-                            <LuSparkles />
-                            <span className="hidden md:block">Learn More</span>
-                        </button>
-                    </div>
-
-                    <button
-                        className="text-gray-400 hover:text-gray-500 cursor-pointer"
-                        onClick={toggleExpand}
-                    >
-                        <LuChevronDown
-                            size={20}
-                            className={`transform transition-transform duration-300 ${isExpanded ? "rotate-180" : ""}`}
-                        />
-                    </button>
-                </div>
-            </div>
-
-            <div
-                className="overflow-hidden transition-all duration-300 ease-in-out"
-                style={{ maxHeight: `${height}px` }}
-            >
-                <div ref={contentRef} className="mt-4 text-gray-700 bg-gray-50 px-5 py-3 rounded-lg">
-                    <AIResponsePreview content={answer} />
-                    <div className="text-sm md:text-base leading-relaxed">{answer}</div>
-                </div>
-            </div>
-        </div>
-    );
-};
-
-export default QuestionCard;
->>>>>>> 5e506d1fb0f2d5b3963692aaecb14d5ff050bcfa

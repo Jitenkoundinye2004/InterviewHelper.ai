@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useContext } from 'react';
+import React, { useState, useEffect, useRef, useContext, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import moment from "moment";
 import { AnimatePresence, motion } from "framer-motion";
@@ -18,6 +18,17 @@ import SkeletonLoader from '../../components/Loader/SkeletonLoader';
 import { LuDownload, LuListCollapse } from 'react-icons/lu';
 import SpinnerLoader from '../../components/Loader/SpinnerLoader';
 import { UserContext } from '../../context/userContext';
+
+// Debounce utility
+const debounce = (func, delay) => {
+    let timeoutId;
+    return (...args) => {
+        clearTimeout(timeoutId);
+        timeoutId = setTimeout(() => {
+            func.apply(this, args);
+        }, delay);
+    };
+};
 
 
 const InterviewPrepPage = () => {
@@ -98,10 +109,20 @@ const InterviewPrepPage = () => {
             }
         } catch (error) {
             console.error("Error:", error);
-            setErrorMsg(error.response?.data?.message || "Failed to generate explanation");
+            const errorMessage = error.response?.data?.message || "Failed to generate explanation";
+            setErrorMsg(errorMessage);
+            // If it's a rate limit error, open the drawer to show the message
+            if (error.response?.status === 429) {
+                setExplanation({ title: "Rate Limit Exceeded", explanation: errorMessage });
+                setOpenLeanWordDrawer(true);
+            }
         } finally {
             setIsLoading(false);
         }
+    };
+
+    const handleLearnMore = (question) => {
+        generateConceptExplanation(question);
     };
 
     const toggleQuestionPinStatus = async (questionId) => {
@@ -204,6 +225,8 @@ const InterviewPrepPage = () => {
             // Fetch all explanations in a single batch request for speed
             const response = await axiosInstance.post(API_PATHS.AI.GENERATE_BULK_EXPLANATION, {
                 questions: sessionData.questions.map(qa => qa.question)
+            }, {
+                timeout: 0 // Disable timeout for this long-running request
             });
 
             const detailedAnswers = response.data.explanations;
@@ -376,7 +399,7 @@ const InterviewPrepPage = () => {
                                             answer={data.answer}
                                             isPinned={data.isPinned}
                                             onTogglePin={() => toggleQuestionPinStatus(data._id)}
-                                            onLearnMore={() => generateConceptExplanation(data.question)}
+                                            onLearnMore={() => handleLearnMore(data.question)}
                                             isDrawerOpen={openLeanWordDrawer}
                                         />
                                     </motion.div>

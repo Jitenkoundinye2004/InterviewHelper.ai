@@ -141,12 +141,8 @@ const Signup = ({ setCurrentPage }) => {
 
         <button
           type="submit"
-<<<<<<< HEAD
           disabled={isLoading}
           className="bg-blue-500 text-white py-2 rounded hover:bg-blue-600 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
-=======
-          className="bg-blue-500 text-white py-2 rounded hover:bg-blue-600 cursor-pointer"
->>>>>>> 5e506d1fb0f2d5b3963692aaecb14d5ff050bcfa
         >
           {isLoading ? (
             <div className="flex items-center">
