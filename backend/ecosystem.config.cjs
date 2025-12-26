@@ -2,7 +2,7 @@ module.exports = {
   apps: [{
     name: 'interview-prep-backend',
     script: 'cluster.js',
-    instances: 1, 
+    instances: 1,
     exec_mode: 'fork',
     env: {
       NODE_ENV: 'development',
