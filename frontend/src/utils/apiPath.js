@@ -1,5 +1,4 @@
-// export const BASE_URL = "https://interviewhelper-ai.onrender.com";
-export const BASE_URL = "https://interviewhelper-ai.onrender.com";
+export const BASE_URL = "https://interviewhelper-ai-backend.onrender.com";
 
 export const API_PATHS = {
   AUTH: {
