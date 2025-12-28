@@ -3,19 +3,37 @@ import axiosInstance from '../utils/axiosInstance';
 import { API_PATHS } from '../utils/apiPath';
 import toast from 'react-hot-toast';
 import { Link } from 'react-router-dom';
+import { validateEmail } from '../utils/helper';
 
 const ForgotPassword = () => {
     const [email, setEmail] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [message, setMessage] = useState('');
+    const [error, setError] = useState('');
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         setIsLoading(true);
         setMessage('');
+        setError('');
+
+        // Trim and validate email
+        const trimmedEmail = email.trim();
+
+        if (!trimmedEmail) {
+            setError('Email address is required.');
+            setIsLoading(false);
+            return;
+        }
+
+        if (!validateEmail(trimmedEmail)) {
+            setError('Please enter a valid email address.');
+            setIsLoading(false);
+            return;
+        }
 
         try {
-            const response = await axiosInstance.post(API_PATHS.AUTH.FORGOT_PASSWORD, { email });
+            const response = await axiosInstance.post(API_PATHS.AUTH.FORGOT_PASSWORD, { email: trimmedEmail });
             setMessage(response.data.message);
             toast.success(response.data.message);
         } catch (error) {
@@ -44,11 +62,12 @@ const ForgotPassword = () => {
                             autoComplete="email"
                             required
                             value={email}
-                            onChange={(e) => setEmail(e.target.value)}
+                            onChange={(e) => { setEmail(e.target.value); if (error) setError(''); }}
                             className="w-full px-3 py-2 mt-1 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
                         />
                     </div>
 
+                    {error && <p className="text-sm text-center text-red-600">{error}</p>}
                     {message && <p className="text-sm text-center text-green-600">{message}</p>}
 
                     <div>

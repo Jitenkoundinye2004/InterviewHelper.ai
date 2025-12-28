@@ -24,6 +24,8 @@ const CreateSessionForm = ({ onSuccess }) => {
             ...prevData,
             [key]: value,
         }));
+        // Clear error when user starts typing
+        if (error) setError(null);
     };
 
     const handleCreateSession = async (e) => {
@@ -31,12 +33,73 @@ const CreateSessionForm = ({ onSuccess }) => {
         setIsLoading(true);
         setError(null);
 
+        // Trim inputs
+        const role = formData.role.trim();
+        const topicsToFocus = formData.topicsToFocus.trim();
+        const experience = formData.experience.trim();
+
+        // Validation checks
+        if (!role) {
+            setError("Target role is required.");
+            setIsLoading(false);
+            return;
+        }
+
+        if (role.length < 2) {
+            setError("Role must be at least 2 characters long.");
+            setIsLoading(false);
+            return;
+        }
+
+        if (role.length > 100) {
+            setError("Role must not exceed 100 characters.");
+            setIsLoading(false);
+            return;
+        }
+
+        if (!experience) {
+            setError("Years of experience is required.");
+            setIsLoading(false);
+            return;
+        }
+
+        const expNum = parseInt(experience);
+        if (isNaN(expNum) || expNum < 0) {
+            setError("Please enter a valid experience (0 or more years).");
+            setIsLoading(false);
+            return;
+        }
+
+        if (expNum > 50) {
+            setError("Experience cannot exceed 50 years.");
+            setIsLoading(false);
+            return;
+        }
+
+        if (!topicsToFocus) {
+            setError("Topics to focus on are required.");
+            setIsLoading(false);
+            return;
+        }
+
+        if (topicsToFocus.length < 3) {
+            setError("Topics must be at least 3 characters long.");
+            setIsLoading(false);
+            return;
+        }
+
+        if (topicsToFocus.length > 500) {
+            setError("Topics must not exceed 500 characters.");
+            setIsLoading(false);
+            return;
+        }
+
         try {
             console.log("Generating questions...");
             const aiResponse = await axiosInstance.post(API_PATHS.AI.GENERATE_QUESTIONS, {
-                role: formData.role,
-                experience: parseInt(formData.experience),
-                topicsToFocus: formData.topicsToFocus,
+                role,
+                experience: expNum,
+                topicsToFocus,
                 numberOfQuestions: 10
             }, {
                 timeout: 60000 // 60 seconds for AI generation
@@ -45,8 +108,10 @@ const CreateSessionForm = ({ onSuccess }) => {
             if (aiResponse.data?.questions) {
                 // Create session with generated questions
                 const response = await axiosInstance.post(API_PATHS.SESSION.CREATE, {
-                    ...formData,
-                    experience: parseInt(formData.experience),
+                    role,
+                    experience: expNum,
+                    topicsToFocus,
+                    description: formData.description.trim(),
                     questions: aiResponse.data.questions
                 });
 
@@ -86,14 +151,18 @@ const CreateSessionForm = ({ onSuccess }) => {
                     label="Target Role"
                     placeholder="e.g., Frontend Developer, UI/UX Designer, etc."
                     type="text"
+                    required
                 />
 
                 <Input
                     value={formData.experience}
                     onChange={({ target }) => handleChange("experience", target.value)}
                     label="Years of Experience"
-                    placeholder="e.g., 1 year, 3 years, 5+ years"
+                    placeholder="e.g., 1, 3, 5"
                     type="number"
+                    min="0"
+                    max="50"
+                    required
                 />
 
                 <Input
@@ -102,6 +171,7 @@ const CreateSessionForm = ({ onSuccess }) => {
                     label="Topics to Focus On"
                     placeholder="Comma-separated, e.g., React, Node.js, MongoDB"
                     type="text"
+                    required
                 />
 
                 {error && (

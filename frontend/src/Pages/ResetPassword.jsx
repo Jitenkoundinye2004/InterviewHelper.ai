@@ -15,17 +15,54 @@ const ResetPassword = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        if (password !== confirmPassword) {
+        
+        // Trim inputs
+        const trimmedPassword = password.trim();
+        const trimmedConfirmPassword = confirmPassword.trim();
+        
+        // Password validation
+        if (!trimmedPassword) {
+            setError("Password is required.");
+            toast.error("Password is required.");
+            return;
+        }
+
+        if (trimmedPassword.length < 8) {
+            setError("Password must be at least 8 characters long.");
+            toast.error("Password must be at least 8 characters long.");
+            return;
+        }
+
+        if (!/[A-Z]/.test(trimmedPassword)) {
+            setError("Password must contain at least one uppercase letter.");
+            toast.error("Password must contain at least one uppercase letter.");
+            return;
+        }
+
+        if (!/[a-z]/.test(trimmedPassword)) {
+            setError("Password must contain at least one lowercase letter.");
+            toast.error("Password must contain at least one lowercase letter.");
+            return;
+        }
+
+        if (!/[0-9]/.test(trimmedPassword)) {
+            setError("Password must contain at least one number.");
+            toast.error("Password must contain at least one number.");
+            return;
+        }
+
+        if (trimmedPassword !== trimmedConfirmPassword) {
             setError("Passwords do not match.");
             toast.error("Passwords do not match.");
             return;
         }
+        
         setIsLoading(true);
         setError('');
         setMessage('');
 
         try {
-            const response = await axiosInstance.post(API_PATHS.AUTH.RESET_PASSWORD(token), { password });
+            const response = await axiosInstance.post(API_PATHS.AUTH.RESET_PASSWORD(token), { password: trimmedPassword });
             setMessage(response.data.message);
             toast.success(response.data.message);
             setTimeout(() => navigate('/login'), 2000);
@@ -44,13 +81,13 @@ const ResetPassword = () => {
                 <h2 className="text-2xl font-bold text-center text-gray-900">Reset Your Password</h2>
                 <form className="space-y-6" onSubmit={handleSubmit}>
                     <div>
-                        <label htmlFor="password" className="text-sm font-medium text-gray-700">New Password</label>
+                        <label htmlFor="password" className="text-sm font-medium text-gray-700">New Password (min. 8 chars, 1 uppercase, 1 lowercase, 1 number)</label>
                         <input
                             id="password"
                             type="password"
                             required
                             value={password}
-                            onChange={(e) => setPassword(e.target.value)}
+                            onChange={(e) => { setPassword(e.target.value); if (error) setError(''); }}
                             className="w-full px-3 py-2 mt-1 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
                         />
                     </div>
@@ -61,7 +98,7 @@ const ResetPassword = () => {
                             type="password"
                             required
                             value={confirmPassword}
-                            onChange={(e) => setConfirmPassword(e.target.value)}
+                            onChange={(e) => { setConfirmPassword(e.target.value); if (error) setError(''); }}
                             className="w-full px-3 py-2 mt-1 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
                         />
                     </div>
