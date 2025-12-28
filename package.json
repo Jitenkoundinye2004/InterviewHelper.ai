@@ -1,4 +1,7 @@
 {
+  "scripts": {
+    "start": "cd backend && npm start"
+  },
   "dependencies": {
     "@google/generative-ai": "^0.24.1",
     "cluster": "^0.7.7",
