@@ -135,7 +135,7 @@ const InterviewPrepPage = () => {
                 fetchSessionDetailsById();
             }
         } catch (error) {
-            const errorMessage = error.response?.data?.message || error.message || "Something went wrong. Please try again";
+            let errorMessage = error.response?.data?.message || error.message || "Something went wrong. Please try again";
             if (error.message === 'Question generation timed out') errorMessage = "Question generation is taking too long.";
             setErrorMsg(errorMessage);
             toast.error(errorMessage);
