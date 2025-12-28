@@ -19,18 +19,27 @@ const Login = ({ setCurrentPage }) => {
   const handleLogin = async (e) => {
     e.preventDefault();
 
+    // Trim inputs
+    const email = formData.email.trim();
+    const password = formData.password.trim();
+
     // ✅ Validation checks
-    if (!validateEmail(formData.email)) {
+    if (!email) {
+      setError("Email address is required.");
+      return;
+    }
+
+    if (!validateEmail(email)) {
       setError("Please enter a valid email address.");
       return;
     }
 
-    if (!formData.password) {
-      setError("Password cannot be empty.");
+    if (!password) {
+      setError("Password is required.");
       return;
     }
 
-    if (formData.password.length < 8) {
+    if (password.length < 8) {
       setError("Password must be at least 8 characters long.");
       return;
     }
@@ -43,7 +52,7 @@ const Login = ({ setCurrentPage }) => {
 
     // login API call can be made here
     try {
-      const response = await axiosInstance.post(API_PATHS.AUTH.LOGIN, formData);
+      const response = await axiosInstance.post(API_PATHS.AUTH.LOGIN, { email, password });
 
       if (response.data && response.data.token) {
         updateUser(response.data);

@@ -29,22 +29,61 @@ const Signup = ({ setCurrentPage }) => {
 
     let profileImageUrl = "";
 
-    if (!name) {
+    // Trim inputs
+    const trimmedName = name.trim();
+    const trimmedEmail = email.trim();
+    const trimmedPassword = password.trim();
+
+    // Name validation
+    if (!trimmedName) {
       setError("Full name is required.");
       return;
     }
 
-    if (!validateEmail(email)) {
-      setError("Please enter a valid email address.");
-      return;
-    }
-    if (!password) {
-      setError("Password cannot be empty.");
+    if (trimmedName.length < 2) {
+      setError("Name must be at least 2 characters long.");
       return;
     }
 
-    if (password.length < 8) {
+    if (trimmedName.length > 50) {
+      setError("Name must not exceed 50 characters.");
+      return;
+    }
+
+    // Email validation
+    if (!trimmedEmail) {
+      setError("Email address is required.");
+      return;
+    }
+
+    if (!validateEmail(trimmedEmail)) {
+      setError("Please enter a valid email address.");
+      return;
+    }
+
+    // Password validation
+    if (!trimmedPassword) {
+      setError("Password is required.");
+      return;
+    }
+
+    if (trimmedPassword.length < 8) {
       setError("Password must be at least 8 characters long.");
+      return;
+    }
+
+    if (!/[A-Z]/.test(trimmedPassword)) {
+      setError("Password must contain at least one uppercase letter.");
+      return;
+    }
+
+    if (!/[a-z]/.test(trimmedPassword)) {
+      setError("Password must contain at least one lowercase letter.");
+      return;
+    }
+
+    if (!/[0-9]/.test(trimmedPassword)) {
+      setError("Password must contain at least one number.");
       return;
     }
 
@@ -58,11 +97,10 @@ const Signup = ({ setCurrentPage }) => {
         profileImageUrl = imgUploadRes.imageUrl || "";
       }
       const response = await axiosInstance.post(API_PATHS.AUTH.REGISTER, {
-        name,
-        email,
-        password,
+        name: trimmedName,
+        email: trimmedEmail,
+        password: trimmedPassword,
         profileImageUrl,
-
       });
       const { token } = response.data;
 
@@ -142,7 +180,7 @@ const Signup = ({ setCurrentPage }) => {
           <input
             value={password}
             onChange={(e) => { setPassword(e.target.value); if (error) setError(""); }}
-            placeholder="Password (min. 8 chars)"
+            placeholder="Password (min. 8 chars, 1 uppercase, 1 lowercase, 1 number)"
             type={showPassword ? "text" : "password"}
             required
             className="w-full pl-10 pr-10 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-sm"
