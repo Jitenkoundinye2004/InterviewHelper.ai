@@ -7,6 +7,7 @@ import { UserContext } from "../../context/userContext.jsx";
 import axiosInstance from "../../utils/axiosInstance.js";
 import { API_PATHS } from "../../utils/apiPath.js";
 import uploadImage from "../../utils/uploadImage.js";
+import toast from "react-hot-toast";
 
 const Signup = ({ setCurrentPage }) => {
   const [profilepic, setProfilepic] = useState(null);
@@ -121,10 +122,10 @@ const Signup = ({ setCurrentPage }) => {
   };
 
   return (
-    <div className="flex flex-col justify-center px-8 py-10 w-full bg-white">
+    <div className="flex flex-col justify-center px-4 sm:px-8 py-8 sm:py-10 w-full bg-white">
       <div className="mb-6 text-center sm:text-left">
-        <h3 className="text-2xl font-bold text-gray-900 tracking-tight">Create an Account</h3>
-        <p className="text-sm text-gray-500 mt-2">
+        <h3 className="text-2xl sm:text-3xl font-bold text-gray-900 tracking-tight">Create an Account</h3>
+        <p className="text-xs sm:text-sm text-gray-500 mt-2">
           Join us today! Enter your details to get started.
         </p>
       </div>

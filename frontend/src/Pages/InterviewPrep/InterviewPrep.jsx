@@ -226,21 +226,22 @@ const InterviewPrepPage = () => {
                     lastUpdated={sessionData?.updatedAt ? moment(sessionData.updatedAt).format("Do MMM YYYY") : ""}
                 />
 
-                <div className="container mx-auto py-8 px-4 sm:px-6 lg:px-8">
+                <div className="container mx-auto py-6 sm:py-8 px-3 sm:px-6 lg:px-8">
                     {/* Action Bar */}
-                    <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-10 border-b border-gray-100 pb-6">
+                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4 mb-6 sm:mb-10 border-b border-gray-100 pb-4 sm:pb-6">
                         <div>
-                            <h2 className="text-2xl font-bold text-gray-900 tracking-tight">Q&A Session</h2>
-                            <p className="text-sm text-gray-500 mt-1">Review and master your generated interview questions.</p>
+                            <h2 className="text-xl sm:text-2xl font-bold text-gray-900 tracking-tight">Q&A Session</h2>
+                            <p className="text-xs sm:text-sm text-gray-500 mt-1">Review and master your generated interview questions.</p>
                         </div>
 
                         <button
                             onClick={handleDownloadPdf}
-                            className={`group flex items-center gap-2 px-5 py-2.5 text-sm font-semibold text-white bg-blue-600 rounded-lg shadow-md hover:bg-blue-700 hover:shadow-lg transition-all duration-300 ${(!sessionData || isLoading) ? 'opacity-50 cursor-not-allowed' : ''}`}
+                            className={`group flex items-center gap-2 px-4 sm:px-5 py-2 sm:py-2.5 text-xs sm:text-sm font-semibold text-white bg-blue-600 rounded-lg shadow-md hover:bg-blue-700 hover:shadow-lg transition-all duration-300 whitespace-nowrap ${(!sessionData || isLoading) ? 'opacity-50 cursor-not-allowed' : ''}`}
                             disabled={!sessionData || isLoading || isPdfLoading}
                         >
                             {isPdfLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4 group-hover:-translate-y-0.5 transition-transform" />}
-                            {isPdfLoading ? "Generating PDF..." : "Download PDF"}
+                            <span className="hidden sm:inline">{isPdfLoading ? "Generating PDF..." : "Download PDF"}</span>
+                            <span className="sm:hidden">{isPdfLoading ? "Generating..." : "PDF"}</span>
                         </button>
                     </div>
 
@@ -286,14 +287,15 @@ const InterviewPrepPage = () => {
 
                             {/* Load More Button */}
                             {sessionData?.questions?.length > 0 && (
-                                <div className="pt-8 flex justify-center">
+                                <div className="pt-6 sm:pt-8 flex justify-center">
                                     <button
-                                        className="flex items-center gap-2 px-8 py-3 text-sm font-semibold text-gray-700 bg-white border border-gray-200 rounded-full shadow-sm hover:bg-gray-50 hover:border-gray-300 hover:shadow-md transition-all disabled:opacity-70"
+                                        className="flex items-center gap-2 px-6 sm:px-8 py-2.5 sm:py-3 text-xs sm:text-sm font-semibold text-gray-700 bg-white border border-gray-200 rounded-full shadow-sm hover:bg-gray-50 hover:border-gray-300 hover:shadow-md transition-all disabled:opacity-70"
                                         disabled={isUpdateLoader}
                                         onClick={uploadMoreQuestions}
                                     >
-                                        {isUpdateLoader ? <Loader2 className="w-5 h-5 animate-spin text-blue-600" /> : <ListPlus className="w-5 h-5 text-blue-600" />}
-                                        <span>{isUpdateLoader ? "Generating new questions..." : "Load More Questions"}</span>
+                                        {isUpdateLoader ? <Loader2 className="w-4 h-4 sm:w-5 sm:h-5 animate-spin text-blue-600" /> : <ListPlus className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600" />}
+                                        <span className="hidden sm:inline">{isUpdateLoader ? "Generating new questions..." : "Load More Questions"}</span>
+                                        <span className="sm:hidden">{isUpdateLoader ? "Generating..." : "Load More"}</span>
                                     </button>
                                 </div>
                             )}

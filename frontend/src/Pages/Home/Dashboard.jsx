@@ -73,16 +73,16 @@ const Dashboard = () => {
       <div className="container mx-auto px-4 md:px-8 py-8 min-h-[calc(100vh-80px)]">
 
         {/* Header Section */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-10">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 sm:gap-6 mb-8 sm:mb-10">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
               Hello, {user?.name?.split(" ")[0]}! 👋
             </h1>
-            <p className="text-gray-500 mt-1">Here is an overview of your interview preparation sessions.</p>
+            <p className="text-sm sm:text-base text-gray-500 mt-1">Here is an overview of your interview preparation sessions.</p>
           </div>
 
           <button
-            className="flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold px-6 py-3 rounded-xl shadow-lg shadow-blue-500/20 transition-all cursor-pointer hover:-translate-y-0.5"
+            className="flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold px-5 sm:px-6 py-2.5 sm:py-3 rounded-xl shadow-lg shadow-blue-500/20 transition-all cursor-pointer hover:-translate-y-0.5 whitespace-nowrap"
             onClick={() => setOpenCreateModal(true)}
           >
             <LuPlus size={18} />

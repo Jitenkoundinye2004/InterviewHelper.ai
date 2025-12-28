@@ -133,12 +133,12 @@ const CreateSessionForm = ({ onSuccess }) => {
 
 
     return (
-        <div className="w-full max-w-md mx-auto p-6 bg-white rounded-lg">
-            <div className="text-center mb-6">
-                <h3 className="text-xl font-bold text-gray-800 mb-2">
+        <div className="w-full max-w-md mx-auto p-4 sm:p-6 bg-white rounded-lg">
+            <div className="text-center mb-4 sm:mb-6">
+                <h3 className="text-lg sm:text-xl font-bold text-gray-800 mb-2">
                     Start a New Interview Journey
                 </h3>
-                <p className="text-sm text-gray-600 leading-relaxed">
+                <p className="text-xs sm:text-sm text-gray-600 leading-relaxed">
                     Fill out a few quick details and unlock your personalized set of
                     interview questions!
                 </p>
