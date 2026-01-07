@@ -25,8 +25,12 @@ import helmet from "helmet";
 
 const app = express();
 
-// Security headers
-app.use(helmet());
+// Security headers (relax COOP/COEP for OAuth popups and postMessage)
+// Relax COOP/COEP to allow OAuth popups and cross-window messaging
+app.use(helmet({
+    crossOriginOpenerPolicy: { policy: "same-origin-allow-popups" },
+    crossOriginEmbedderPolicy: false,
+}));
 
 // Compression middleware to reduce response sizes
 app.use(compression());

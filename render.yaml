@@ -16,6 +16,13 @@ services:
     buildCommand: npm install && npm run build
     staticPublishPath: dist
     routes:
+      - type: header
+        source: /*
+        headers:
+          - key: Cross-Origin-Opener-Policy
+            value: same-origin-allow-popups
+          - key: Cross-Origin-Embedder-Policy
+            value: unsafe-none
       - type: rewrite
         source: /*
         destination: /index.html
