@@ -6,7 +6,7 @@ dotenv.config();
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
-const DEFAULT_MODEL = "gemini-1.5-flash";
+const DEFAULT_MODEL = "gemini-2.5-flash";
 const getModelId = () => {
     let modelEnv = (process.env.GEMINI_MODEL || "").trim();
     if (!modelEnv) modelEnv = DEFAULT_MODEL;
