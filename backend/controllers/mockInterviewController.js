@@ -6,9 +6,10 @@ dotenv.config();
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
+const DEFAULT_MODEL = "gemini-1.5-flash";
 const getModelId = () => {
     let modelEnv = (process.env.GEMINI_MODEL || "").trim();
-    if (!modelEnv) modelEnv = "gemini-1.5-flash";
+    if (!modelEnv) modelEnv = DEFAULT_MODEL;
     return modelEnv;
 };
 
@@ -28,15 +29,34 @@ export const startInterview = async (req, res) => {
             return res.status(500).json({ message: "AI service is not configured. Please contact support." });
         }
 
-        // Generate the first question using AI
+        // Generate the first question using AI with fallback logic
         const prompt = `You are an expert interviewer conducting a technical interview for a ${role} position with ${experience} years of experience. The topics to focus on are: ${topics}.
     Start the interview by asking the first question.
     Return ONLY the question text. Do not include "Question 1" or similar prefixes.`;
 
-        const modelId = getModelId();
-        const model = genAI.getGenerativeModel({ model: modelId });
-        const result = await model.generateContent(prompt);
-        const question = result.response.text().trim();
+        let question = "";
+        let modelId = getModelId();
+        try {
+            const model = genAI.getGenerativeModel({ model: modelId });
+            const result = await model.generateContent(prompt);
+            question = result.response.text().trim();
+        } catch (aiErr) {
+            // Fallback to default model if configured model fails (e.g., 2.5 not available)
+            if (modelId !== DEFAULT_MODEL) {
+                try {
+                    modelId = DEFAULT_MODEL;
+                    const model = genAI.getGenerativeModel({ model: modelId });
+                    const result = await model.generateContent(prompt);
+                    question = result.response.text().trim();
+                } catch (fallbackErr) {
+                    console.error("Gemini fallback failed:", fallbackErr);
+                    return res.status(500).json({ message: "Failed to start interview", error: fallbackErr.message });
+                }
+            } else {
+                console.error("Gemini generateContent failed:", aiErr);
+                return res.status(500).json({ message: "Failed to start interview", error: aiErr.message });
+            }
+        }
 
         // Create the interview session
         const interview = new MockInterview({
