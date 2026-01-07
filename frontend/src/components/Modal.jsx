@@ -38,7 +38,10 @@ const Modal = ({ children, isOpen, onClose, title, hideHider }) => {
         </button>
 
         {/* Modal body */}
-        <div className="flex-1 overflow-y-auto custom-scrollbar max-h-[85vh] w-full">
+        <div
+          className="flex-1 overflow-y-auto custom-scrollbar max-h-[85vh] w-full overscroll-contain"
+          data-lenis-prevent
+        >
           {children}
         </div>
       </div>
