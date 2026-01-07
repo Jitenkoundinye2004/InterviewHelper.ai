@@ -1,9 +1,12 @@
 import React, { useContext, useEffect } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
+import { GoogleOAuthProvider } from "@react-oauth/google";
 import LandingPage from "./Pages/LandingPage";
 import Dashboard from "./Pages/Home/Dashboard";
 import InterviewPrepPage from "./Pages/InterviewPrep/InterviewPrep";
+import MockInterviewPage from "./Pages/MockInterview/MockInterview";
 import SignUp from "./Pages/Auth/SignUp";
+
 import { UserContext } from "./context/userContext";
 import Lenis from "lenis";
 import 'lenis/dist/lenis.css';
@@ -36,13 +39,17 @@ const App = () => {
   }, []);
 
   return (
-    <Routes>
-      <Route path="/" element={<LandingPage />} />
-      <Route path="/register" element={<SignUp />} />
+    <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID || "YOUR_GOOGLE_CLIENT_ID"}>
+      <Routes>
+        <Route path="/" element={<LandingPage />} />
+        <Route path="/register" element={<SignUp />} />
 
-      <Route path="/dashboard" element={user ? <Dashboard /> : <Navigate to="/" />} />
-      <Route path="/interview-prep/:sessionId" element={user ? <InterviewPrepPage /> : <Navigate to="/" />} />
-    </Routes>
+        <Route path="/dashboard" element={user ? <Dashboard /> : <Navigate to="/" />} />
+        <Route path="/interview-prep/:sessionId" element={user ? <InterviewPrepPage /> : <Navigate to="/" />} />
+        <Route path="/mock-interview/new" element={user ? <MockInterviewPage /> : <Navigate to="/" />} />
+        <Route path="/mock-interview/:sessionId" element={user ? <MockInterviewPage /> : <Navigate to="/" />} />
+      </Routes>
+    </GoogleOAuthProvider>
   );
 };
 

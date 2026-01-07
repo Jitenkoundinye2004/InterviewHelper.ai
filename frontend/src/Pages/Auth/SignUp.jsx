@@ -1,6 +1,7 @@
 import React, { useContext, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Eye, EyeOff, User, Mail, Lock, ArrowRight } from "lucide-react";
+import { GoogleLogin } from "@react-oauth/google";
+import { Eye, EyeOff, Mail, Lock, ArrowRight } from "lucide-react";
 import ProfilePhotoSelector from "../../components/Inputs/ProfilePhotoSelector";
 import { validateEmail } from "../../utils/helper.js";
 import { UserContext } from "../../context/userContext.jsx";
@@ -17,25 +18,20 @@ const Signup = ({ setCurrentPage }) => {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const { updateUser } = useContext(UserContext);
-
-  // ✅ Added error state
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
   const navigate = useNavigate();
 
-  //Handle signup form submit//
   const handleSignup = async (e) => {
     e.preventDefault();
 
     let profileImageUrl = "";
 
-    // Trim inputs
     const trimmedName = name.trim();
     const trimmedEmail = email.trim();
     const trimmedPassword = password.trim();
 
-    // Name validation
     if (!trimmedName) {
       setError("Full name is required.");
       return;
@@ -51,7 +47,6 @@ const Signup = ({ setCurrentPage }) => {
       return;
     }
 
-    // Email validation
     if (!trimmedEmail) {
       setError("Email address is required.");
       return;
@@ -62,7 +57,6 @@ const Signup = ({ setCurrentPage }) => {
       return;
     }
 
-    // Password validation
     if (!trimmedPassword) {
       setError("Password is required.");
       return;
@@ -90,22 +84,21 @@ const Signup = ({ setCurrentPage }) => {
 
     setError("");
     setIsLoading(true);
-    // signup API call can be made here
+
     try {
-      //Upload image if Present
       if (profilepic) {
-        const imgUploadRes = await uploadImage(profilepic);
-        profileImageUrl = imgUploadRes.imageUrl || "";
+        profileImageUrl = await uploadImage(profilepic);
       }
+
       const response = await axiosInstance.post(API_PATHS.AUTH.REGISTER, {
         name: trimmedName,
         email: trimmedEmail,
         password: trimmedPassword,
         profileImageUrl,
       });
-      const { token } = response.data;
 
-      if (token) {
+      if (response.data && response.data.token) {
+        const token = response.data.token;
         localStorage.setItem("token", token);
         updateUser(response.data);
         navigate("/dashboard");
@@ -121,6 +114,33 @@ const Signup = ({ setCurrentPage }) => {
     }
   };
 
+  const handleGoogleSuccess = async (credentialResponse) => {
+    try {
+      setIsLoading(true);
+      const response = await axiosInstance.post(API_PATHS.AUTH.REGISTER, {
+        googleToken: credentialResponse.credential,
+      });
+
+      if (response.data && response.data.token) {
+        localStorage.setItem("token", response.data.token);
+        updateUser(response.data);
+        toast.success("Account created with Google successfully!");
+        navigate("/dashboard");
+      }
+    } catch (error) {
+      const message = error.response?.data?.message || "Google signup failed. Please try again.";
+      setError(message);
+      toast.error(message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleGoogleError = () => {
+    setError("Google signup failed. Please try again.");
+    toast.error("Google signup failed");
+  };
+
   return (
     <div className="flex flex-col justify-center px-4 sm:px-8 py-8 sm:py-10 w-full bg-white">
       <div className="mb-6 text-center sm:text-left">
@@ -130,7 +150,6 @@ const Signup = ({ setCurrentPage }) => {
         </p>
       </div>
 
-      {/* ✅ Display error */}
       {error && (
         <div className="mb-6 p-3 bg-red-50 border border-red-100 rounded-lg text-red-600 text-sm flex items-center">
           <span className="mr-2">⚠️</span> {error}
@@ -138,21 +157,20 @@ const Signup = ({ setCurrentPage }) => {
       )}
 
       <form onSubmit={handleSignup} className="flex flex-col gap-5">
-
-        <ProfilePhotoSelector
-          image={profilepic}
-          setImage={setProfilepic}
-          preview={preview}
-          setPreview={setPreview}
-        />
+        <div className="flex justify-center mb-2">
+          <ProfilePhotoSelector onImageSelect={setProfilepic} onPreviewChange={setPreview} preview={preview} />
+        </div>
 
         <div className="relative">
           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <User className="h-5 w-5 text-gray-400" />
+            <Mail className="h-5 w-5 text-gray-400" />
           </div>
           <input
             value={name}
-            onChange={(e) => { setName(e.target.value); if (error) setError(""); }}
+            onChange={(e) => {
+              setName(e.target.value);
+              if (error) setError("");
+            }}
             placeholder="Full Name"
             type="text"
             required
@@ -166,7 +184,10 @@ const Signup = ({ setCurrentPage }) => {
           </div>
           <input
             value={email}
-            onChange={(e) => { setEmail(e.target.value); if (error) setError(""); }}
+            onChange={(e) => {
+              setEmail(e.target.value);
+              if (error) setError("");
+            }}
             placeholder="Email Address"
             type="email"
             required
@@ -180,7 +201,10 @@ const Signup = ({ setCurrentPage }) => {
           </div>
           <input
             value={password}
-            onChange={(e) => { setPassword(e.target.value); if (error) setError(""); }}
+            onChange={(e) => {
+              setPassword(e.target.value);
+              if (error) setError("");
+            }}
             placeholder="Password (min. 8 chars, 1 uppercase, 1 lowercase, 1 number)"
             type={showPassword ? "text" : "password"}
             required
@@ -214,7 +238,27 @@ const Signup = ({ setCurrentPage }) => {
         </button>
       </form>
 
-      <div className="mt-8 text-center">
+      <div className="mt-6 sm:mt-8">
+        <div className="relative mb-6">
+          <div className="absolute inset-0 flex items-center">
+            <div className="w-full border-t border-gray-200"></div>
+          </div>
+          <div className="relative flex justify-center text-sm">
+            <span className="px-2 bg-white text-gray-500">Or continue with</span>
+          </div>
+        </div>
+
+        <div className="w-full flex justify-center">
+          <GoogleLogin
+            onSuccess={handleGoogleSuccess}
+            onError={handleGoogleError}
+            theme="outline"
+            size="large"
+          />
+        </div>
+      </div>
+
+      <div className="mt-6 sm:mt-8 text-center">
         <p className="text-sm text-gray-600">
           Already have an account?{" "}
           <button

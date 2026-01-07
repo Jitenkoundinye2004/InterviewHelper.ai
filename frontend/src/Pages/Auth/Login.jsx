@@ -1,5 +1,6 @@
 import React, { useContext, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { GoogleLogin } from "@react-oauth/google";
 import { validateEmail } from "../../utils/helper";
 import axiosInstance from "../../utils/axiosInstance";
 import { API_PATHS } from "../../utils/apiPath";
@@ -16,15 +17,11 @@ const Login = ({ setCurrentPage }) => {
   const { updateUser } = useContext(UserContext);
   const navigate = useNavigate();
 
-  // Handle login form submit
   const handleLogin = async (e) => {
     e.preventDefault();
-
-    // Trim inputs
     const email = formData.email.trim();
     const password = formData.password.trim();
 
-    // ✅ Validation checks
     if (!email) {
       setError("Email address is required.");
       return;
@@ -45,16 +42,11 @@ const Login = ({ setCurrentPage }) => {
       return;
     }
 
-    // Clear previous error
     setError("");
     setIsLoading(true);
 
-    // ✅ Now navigate only after validations pass
-
-    // login API call can be made here
     try {
       const response = await axiosInstance.post(API_PATHS.AUTH.LOGIN, { email, password });
-
       if (response.data && response.data.token) {
         updateUser(response.data);
         toast.success("Logged in successfully!");
@@ -76,6 +68,32 @@ const Login = ({ setCurrentPage }) => {
     if (error) setError('');
   };
 
+  const handleGoogleSuccess = async (credentialResponse) => {
+    try {
+      setIsLoading(true);
+      const response = await axiosInstance.post(API_PATHS.AUTH.LOGIN, {
+        googleToken: credentialResponse.credential,
+      });
+
+      if (response.data && response.data.token) {
+        updateUser(response.data);
+        toast.success("Logged in with Google successfully!");
+        navigate("/dashboard");
+      }
+    } catch (error) {
+      const message = error.response?.data?.message || "Google login failed. Please try again.";
+      setError(message);
+      toast.error(message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleGoogleError = () => {
+    setError("Google login failed. Please try again.");
+    toast.error("Google login failed");
+  };
+
   return (
     <div className="flex flex-col justify-center px-4 sm:px-8 py-8 sm:py-10 w-full bg-white">
       <div className="mb-6 sm:mb-8 text-center sm:text-left">
@@ -85,7 +103,6 @@ const Login = ({ setCurrentPage }) => {
         </p>
       </div>
 
-      {/* Display error messages */}
       {error && (
         <div className="mb-6 p-3 bg-red-50 border border-red-100 rounded-lg text-red-600 text-sm flex items-center">
           <span className="mr-2">⚠️</span> {error}
@@ -131,7 +148,7 @@ const Login = ({ setCurrentPage }) => {
         </div>
 
         <div className="flex justify-end">
-          <button type="button" className="text-xs text-blue-600 hover:text-blue-700 font-medium">ForgotPassword?</button>
+          <button type="button" className="text-xs text-blue-600 hover:text-blue-700 font-medium">Forgot Password?</button>
         </div>
 
         <button
@@ -153,9 +170,29 @@ const Login = ({ setCurrentPage }) => {
         </button>
       </form>
 
+      <div className="mt-6 sm:mt-8">
+        <div className="relative mb-6">
+          <div className="absolute inset-0 flex items-center">
+            <div className="w-full border-t border-gray-200"></div>
+          </div>
+          <div className="relative flex justify-center text-sm">
+            <span className="px-2 bg-white text-gray-500">Or continue with</span>
+          </div>
+        </div>
+
+        <div className="w-full flex justify-center">
+          <GoogleLogin
+            onSuccess={handleGoogleSuccess}
+            onError={handleGoogleError}
+            theme="outline"
+            size="large"
+          />
+        </div>
+      </div>
+
       <div className="mt-8 text-center">
         <p className="text-sm text-gray-600">
-          Don’t have an account?{" "}
+          Don't have an account?{" "}
           <button
             type="button"
             className="text-blue-600 font-semibold hover:text-blue-700 hover:underline transition-all cursor-pointer"

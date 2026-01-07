@@ -29,4 +29,12 @@ export const API_PATHS = {
     PIN: (id) => `/api/questions/${id}/pin`, // Pin or Unpin a question
     UPDATE_NOTE: (id) => `/api/questions/${id}/note`, // Update/Add a note to a question
   },
+
+  MOCK_INTERVIEW: {
+    START: "/api/mock-interviews/start",
+    CHAT: (id) => `/api/mock-interviews/${id}/chat`,
+    END: (id) => `/api/mock-interviews/${id}/end`,
+    GET: (id) => `/api/mock-interviews/${id}`,
+  },
 };
+

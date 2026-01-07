@@ -15,6 +15,17 @@ const Navbar = () => {
           </span>
         </Link>
 
+        {/* Navigation Links */}
+        <div className="hidden sm:flex items-center gap-6">
+          <Link to="/dashboard" className="text-sm font-medium text-gray-600 hover:text-blue-600 transition-colors">
+            Dashboard
+          </Link>
+          <Link to="/mock-interview/new" className="text-sm font-medium text-gray-600 hover:text-blue-600 transition-colors">
+            Mock Interview
+          </Link>
+        </div>
+
+
         <ProfileInfoCard />
       </div>
     </div>

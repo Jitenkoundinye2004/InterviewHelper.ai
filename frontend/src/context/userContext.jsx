@@ -6,11 +6,9 @@ export const UserContext = createContext();
 
 const UserContextProvider = ({ children }) => {
   const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true); // New state to track loading
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (user) return;
-
     const accessToken = localStorage.getItem("token");
     if (!accessToken) {
       setLoading(false);
@@ -22,34 +20,35 @@ const UserContextProvider = ({ children }) => {
         const response = await axiosInstance.get(API_PATHS.AUTH.GET_PROFILE);
         setUser(response.data);
       } catch (error) {
-        console.error("User not authenticated", error);
-        clearUser();
+        console.error("Authentication failed:", error.response?.status, error.response?.data?.message || error.message);
+        // Only clear user if it's an auth error (401)
+        if (error.response?.status === 401) {
+          clearUser();
+        }
       } finally {
         setLoading(false);
       }
     };
     fetchUser();
-},[]);
+  }, []);
 
-const updateUser =(userData)=>{
+const updateUser = (userData) => {
   if (userData && userData.token) {
     localStorage.setItem("token", userData.token);
   }
-  setUser(userData); // This can be user object or null on logout
+  setUser(userData);
   if (loading) setLoading(false);
 };
 
-
-const clearUser=()=>{
-    setUser(null);
-    localStorage.removeItem("token");
-
+const clearUser = () => {
+  setUser(null);
+  localStorage.removeItem("token");
 };
 
-return(
-    <UserContext.Provider value={{user,loading,updateUser,clearUser}}>
-        {children}
-    </UserContext.Provider>
+return (
+  <UserContext.Provider value={{ user, loading, updateUser, clearUser, setUser }}>
+    {children}
+  </UserContext.Provider>
 );
 };
 

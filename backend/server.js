@@ -14,6 +14,8 @@ import QuestionRoute from "./routes/questionRoute.js"
 import { protect } from "./middleware/authMiddleware.js";
 import { generateConceptExplanation, generateInterviewQuestions, generateBulkExplanation } from "./controllers/aiController.js";
 import redis from "./config/redis.js";
+import mockInterviewRoute from "./routes/mockInterviewRoute.js";
+
 
 
 const __filename = fileURLToPath(import.meta.url);
@@ -43,6 +45,7 @@ const allowedOrigins = [
     'https://interviewhelper-ai.onrender.com',
     'http://localhost:5173',
     'http://localhost:5174',
+    'http://localhost:5175',
     'http://localhost:3000'
 ];
 
@@ -102,6 +105,8 @@ app.get('/health', (req, res) => {
 app.use("/api/auth", checkDBConnection, authRoute);
 app.use("/api/sessions", checkDBConnection, sessionRoute);
 app.use("/api/questions", checkDBConnection, QuestionRoute);
+app.use("/api/mock-interviews", checkDBConnection, mockInterviewRoute);
+
 
 // AI Routes
 app.post("/api/ai/generate-questions", protect, generateInterviewQuestions);
